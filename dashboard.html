@@ -502,28 +502,47 @@ async function loadData() {
   const statusEl = document.querySelector('.config-bar span:first-child');
   const successEl = document.getElementById('loadStatus');
 
+  console.log('Starting data load...');
+  console.log('Fetching URL:', PUB_URL);
+  
   try {
     const res = await fetch(PUB_URL);
+    console.log('Fetch response:', res.status, res.statusText);
+    
     if (!res.ok) {
-      statusEl.textContent = '⚠ Failed to load data';
+      console.error('Response not OK:', res.status);
+      statusEl.textContent = '⚠ Failed to load data (status: ' + res.status + ')';
       statusEl.style.color = 'var(--red)';
       return;
     }
+    
     const text = await res.text();
+    console.log('Text length:', text.length);
+    console.log('First 200 chars:', text.substring(0, 200));
+    
     if (text.length < 100) {
-      statusEl.textContent = '⚠ Failed to load data';
+      console.error('Response too short');
+      statusEl.textContent = '⚠ Failed to load data (empty)';
       statusEl.style.color = 'var(--red)';
       return;
     }
+    
+    console.log('Parsing CSV...');
     // Destroy existing charts before re-rendering
     if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
     if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
     parseCSV(text);
+    console.log('Parsed trades:', allTrades.length);
+    
+    console.log('Rendering...');
     renderAll();
+    console.log('Render complete');
+    
     statusEl.style.display = 'none';
     successEl.style.display = 'inline';
   } catch(e) {
-    statusEl.textContent = '⚠ Failed to load data';
+    console.error('Load error:', e);
+    statusEl.textContent = '⚠ Failed to load data: ' + e.message;
     statusEl.style.color = 'var(--red)';
   }
 }
