@@ -85,7 +85,7 @@
   /* Metric Cards */
   .metrics-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
     gap: 16px;
     margin-bottom: 24px;
   }
@@ -93,9 +93,11 @@
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 20px 22px;
+    padding: 20px 22px 18px 22px;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
   .metric-card .label {
     font-size: 12px;
@@ -104,7 +106,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .metric-card .value {
     font-size: 26px;
@@ -152,7 +154,7 @@
   /* Charts Row */
   .charts-row {
     display: grid;
-    grid-template-columns: 1.4fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
     gap: 16px;
     margin-bottom: 24px;
   }
@@ -281,7 +283,7 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-  }
+    float: right;
   }
   .cal-day .day-pnl {
     font-size: 13px;
@@ -303,7 +305,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-top: 29px;
+    margin-top: 31px;
   }
   .week-item {
     background: var(--bg-deep);
@@ -341,6 +343,58 @@
 
   /* Empty state for calendar days */
   .cal-day.empty { opacity: 0.3; }
+  /* Responsive */
+  @media (max-width: 1024px) {
+    body {
+      padding: 28px 48px;
+    }
+    .metrics-row {
+      grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    }
+  }
+  
+  @media (max-width: 768px) {
+    body {
+      padding: 20px 24px;
+    }
+    .header {
+      margin-bottom: 20px;
+    }
+    .metrics-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .charts-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .calendar-grid-wrapper {
+      flex-direction: column;
+    }
+    .weekly-sidebar {
+      flex-direction: row;
+      width: 100%;
+      margin-top: 12px;
+    }
+    .week-item {
+      flex: 1;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    body {
+      padding: 16px;
+    }
+    .metric-card {
+      padding: 16px 18px 14px 18px;
+    }
+    .chart-card {
+      padding: 18px 20px;
+    }
+    .value {
+      font-size: 22px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -395,14 +449,15 @@
   </div>
   <div class="metric-card" id="card-avg">
     <div class="label">Avg win / loss trade </div>
-    <div style="display:flex; gap:24px; margin-top:4px;">
-      <div><div class="value positive" id="val-avgwin">—</div></div>
-      <div><div class="value negative" id="val-avgloss">—</div></div>
-    </div>
-    <div class="avg-bar" id="avg-bar"><div class="win-part"></div><div class="loss-part"></div></div>
-    <div class="avg-bar-labels">
-      <span class="win-label" id="label-avgwin">—</span>
-      <span class="loss-label" id="label-avgloss">—</span>
+    <div style="display:flex; align-items:center; gap:16px; margin-top:4px;">
+      <div class="value" id="val-ratio" style="font-size:20px; white-space:nowrap;">—</div>
+      <div style="flex:1; min-width:100px;">
+        <div class="avg-bar" id="avg-bar"><div class="win-part"></div><div class="loss-part"></div></div>
+        <div class="avg-bar-labels">
+          <span class="win-label" id="label-avgwin">—</span>
+          <span class="loss-label" id="label-avgloss">—</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -744,8 +799,9 @@ function renderMetrics() {
   // Avg win / loss
   const avgWin = wins > 0 ? grossProfit / wins : 0;
   const avgLoss = losses > 0 ? grossLoss / losses : 0;
-  document.getElementById('val-avgwin').textContent = formatCurrency(avgWin);
-  document.getElementById('val-avgloss').textContent = '-' + formatCurrency(avgLoss);
+  const ratio = avgLoss > 0 ? avgWin / avgLoss : 0;
+  
+  document.getElementById('val-ratio').textContent = ratio > 0 ? ratio.toFixed(2) : '—';
   document.getElementById('label-avgwin').textContent = formatCurrency(avgWin);
   document.getElementById('label-avgloss').textContent = '-' + formatCurrency(avgLoss);
 
