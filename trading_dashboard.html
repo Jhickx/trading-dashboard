@@ -472,6 +472,11 @@ async function loadData() {
       if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
       if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
       parseCSV(text);
+      // Debug: show what we got
+      console.log('RAW CSV (first 500 chars):', text.substring(0, 500));
+      console.log('allTrades count:', allTrades.length);
+      console.log('dailyData keys:', Object.keys(dailyData));
+      if (allTrades.length > 0) console.log('First trade:', JSON.stringify(allTrades[0]));
       renderAll();
       statusEl.style.display = 'none';
       successEl.style.display = 'inline';
