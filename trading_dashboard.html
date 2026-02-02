@@ -467,9 +467,25 @@ async function loadData() {
       if (!res.ok) continue;
       const text = await res.text();
       if (text.length < 100) continue;
-      // Destroy existing charts before re-rendering
-      if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
-      if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
+      
+      // Properly destroy charts and reset canvases
+      if (cumulativeChart) {
+        cumulativeChart.destroy();
+        cumulativeChart = null;
+      }
+      if (dailyChart) {
+        dailyChart.destroy();
+        dailyChart = null;
+      }
+      
+      // Reset canvas elements to prevent size issues
+      const cumCanvas = document.getElementById('cumulativeChart');
+      const dailyCanvas = document.getElementById('dailyChart');
+      cumCanvas.style.width = '';
+      cumCanvas.style.height = '';
+      dailyCanvas.style.width = '';
+      dailyCanvas.style.height = '';
+      
       parseCSV(text);
       renderAll();
       statusEl.style.display = 'none';
