@@ -109,9 +109,9 @@
     margin-bottom: 8px;
   }
   .metric-card .value {
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 700;
-    letter-spacing: -1px;
+    letter-spacing: -0.5px;
   }
   .metric-card .value.positive { color: var(--green); }
   .metric-card .value.negative { color: var(--red); }
@@ -259,8 +259,9 @@
     background: var(--bg-deep);
     border-radius: 8px;
     padding: 8px 6px;
-    min-height: 80px;
+    height: 90px;
     position: relative;
+    overflow: hidden;
     border: 1px solid transparent;
   }
   .cal-day.positive { background: rgba(0,201,167,0.08); border-color: rgba(0,201,167,0.2); }
@@ -284,6 +285,11 @@
     height: 20px;
     border-radius: 50%;
     float: right;
+    clear: both;
+  }
+  .cal-day.today .day-pnl {
+    clear: both;
+  }
   }
   .cal-day .day-pnl {
     font-size: 13px;
@@ -305,13 +311,13 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-top: 31px;
+    margin-top: 27px;
   }
   .week-item {
     background: var(--bg-deep);
     border-radius: 8px;
     padding: 10px 12px;
-    flex: 1;
+    height: 90px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -423,16 +429,16 @@
     <div class="label">Net P&L </div>
     <div class="value" id="val-pnl">—</div>
   </div>
-  <div class="metric-card" id="card-winrate" style="position:relative;">
+  <div class="metric-card" id="card-winrate" style="position:relative; padding-right:110px;">
     <div class="label">Trade win % </div>
     <div class="value" id="val-winrate" style="margin-top:4px;">—</div>
     <div style="position:absolute; top:20px; right:20px; display:flex; flex-direction:column; align-items:center;">
-      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:90px; height:56px;">
+      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:70px; height:44px;">
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round"/>
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" id="gauge-arc-loss" stroke-dasharray="94.25" stroke-dashoffset="0"/>
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" id="gauge-arc" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
       </svg>
-      <div class="gauge-stats" style="margin-top:4px;">
+      <div class="gauge-stats" style="margin-top:6px;">
         <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div></div>
         <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div></div>
         <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div></div>
