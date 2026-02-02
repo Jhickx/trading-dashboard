@@ -6,6 +6,8 @@
 <title>Trading Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.2/build/cjs-browser/luxon.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.bundle.min.js"></script>
 <style>
   :root {
     --bg-deep: #0a0c0f;
@@ -457,31 +459,29 @@ const PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_
 async function loadData() {
   const statusEl = document.querySelector('.config-bar span:first-child');
   const successEl = document.getElementById('loadStatus');
-  let errors = [];
 
-  // Try gviz first, then fall back to pub URL
   const urls = [GVIZ_URL, PUB_URL];
 
   for (const url of urls) {
     try {
       const res = await fetch(url);
-      const text = await res.text();
-      errors.push(url.split('/').slice(3,5).join('/') + ' → status: ' + res.status + ', length: ' + text.length);
       if (!res.ok) continue;
-      if (text.length < 50) continue;
+      const text = await res.text();
+      if (text.length < 100) continue;
+      // Destroy existing charts before re-rendering
+      if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
+      if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
       parseCSV(text);
       renderAll();
       statusEl.style.display = 'none';
       successEl.style.display = 'inline';
-      return;
+      return; // Stop after first success
     } catch(e) {
-      errors.push(url.split('/').slice(3,5).join('/') + ' → ' + e.message);
       continue;
     }
   }
 
-  // Both failed - show detailed errors
-  statusEl.textContent = '⚠ ' + errors.join(' | ');
+  statusEl.textContent = '⚠ Failed to load data';
   statusEl.style.color = 'var(--red)';
 }
 
