@@ -274,11 +274,11 @@
   .cal-day.today .day-num { 
     color: var(--text-muted);
     font-weight: 400;
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    line-height: 18px;
-    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
     border: 1.5px solid #e64848;
     border-radius: 50%;
   }
@@ -371,13 +371,13 @@
   <div class="metric-card" id="card-winrate">
     <div class="label">Trade win % </div>
     <div class="value" id="val-winrate" style="margin-top:4px;">—</div>
-    <div style="display:flex; flex-direction:column; align-items:center; margin-top:16px;">
-      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:80px; height:50px;">
+    <div style="display:flex; flex-direction:column; align-items:center; margin-top:20px;">
+      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:90px; height:56px;">
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round"/>
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" id="gauge-arc-loss" stroke-dasharray="94.25" stroke-dashoffset="0"/>
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" id="gauge-arc" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
       </svg>
-      <div class="gauge-stats" style="margin-top:8px;">
+      <div class="gauge-stats" style="margin-top:12px;">
         <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div><div>Wins</div></div>
         <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div><div>B/E</div></div>
         <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div><div>Losses</div></div>
