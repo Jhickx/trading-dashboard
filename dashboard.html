@@ -552,27 +552,40 @@ async function loadData() {
   const statusEl = document.querySelector('.config-bar span:first-child');
   const successEl = document.getElementById('loadStatus');
 
+  console.log('Starting data load...');
+  console.log('Status elements:', statusEl, successEl);
+
   const urls = [PUB_URL, GVIZ_URL];
 
   for (const url of urls) {
+    console.log('Trying URL:', url);
     try {
       const res = await fetch(url);
+      console.log('Fetch response:', res.status, res.ok);
       if (!res.ok) continue;
       const text = await res.text();
+      console.log('Text length:', text.length);
+      console.log('First 200 chars:', text.substring(0, 200));
       if (text.length < 100) continue;
       // Destroy existing charts before re-rendering
       if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
       if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
+      console.log('Parsing CSV...');
       parseCSV(text);
+      console.log('Parsed trades:', allTrades.length);
+      console.log('Rendering...');
       renderAll();
+      console.log('Done!');
       statusEl.style.display = 'none';
       successEl.style.display = 'inline';
       return; // Stop after first success
     } catch(e) {
+      console.error('Error loading from', url, ':', e);
       continue;
     }
   }
 
+  console.error('Failed to load from all URLs');
   statusEl.textContent = '⚠ Failed to load data';
   statusEl.style.color = 'var(--red)';
 }
