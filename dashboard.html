@@ -735,9 +735,10 @@ function renderMetrics() {
 
   // PF gauge (cap at 3 for visual)
   const pfGauge = document.getElementById('pf-gauge-circle');
+  const pfCircumference = 163.36; // Full circle for PF gauge
   const pfPercent = Math.min(pf / 3, 1);
-  pfGauge.style.strokeDashoffset = circumference * (1 - pfPercent);
-  pfGauge.style.stroke = pf >= 1 ? 'var(--green)' : 'var(--red)';
+  pfGauge.style.strokeDashoffset = pfCircumference * (1 - pfPercent);
+  pfGauge.style.stroke = pf >= 1 ? '#00c9a7' : '#ff4757';
 
   // Avg win / loss
   const avgWin = wins > 0 ? grossProfit / wins : 0;
