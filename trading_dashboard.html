@@ -272,18 +272,13 @@
   }
   .cal-day.today { background: transparent; }
   .cal-day.today .day-num { 
-    color: #e64848; 
-    font-weight: 600;
-    position: relative;
-  }
-  .cal-day.today .day-num::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 20px;
-    height: 20px;
+    color: var(--text-muted);
+    font-weight: 400;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
     border: 1.5px solid #e64848;
     border-radius: 50%;
   }
@@ -373,18 +368,20 @@
     <div class="label">Net P&L </div>
     <div class="value" id="val-pnl">—</div>
   </div>
-  <div class="metric-card" id="card-winrate" style="position:relative;">
-    <svg class="gauge-svg" viewBox="0 0 64 64" style="position:absolute; top:20px; right:20px;">
-      <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
-      <circle cx="32" cy="32" r="26" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" id="gauge-circle-loss" transform="rotate(-90 32 32)"/>
-      <circle cx="32" cy="32" r="26" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="gauge-circle" transform="rotate(-90 32 32)"/>
-    </svg>
+  <div class="metric-card" id="card-winrate">
     <div class="label">Trade win % </div>
     <div class="value" id="val-winrate" style="margin-top:4px;">—</div>
-    <div class="gauge-stats" style="margin-top:12px;">
-      <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div><div>Wins</div></div>
-      <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div><div>B/E</div></div>
-      <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div><div>Losses</div></div>
+    <div style="display:flex; flex-direction:column; align-items:center; margin-top:16px;">
+      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:80px; height:50px;">
+        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" id="gauge-arc-loss" stroke-dasharray="94.25" stroke-dashoffset="0"/>
+        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" id="gauge-arc" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
+      </svg>
+      <div class="gauge-stats" style="margin-top:8px;">
+        <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div><div>Wins</div></div>
+        <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div><div>B/E</div></div>
+        <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div><div>Losses</div></div>
+      </div>
     </div>
   </div>
   <div class="metric-card" id="card-pf" style="position:relative;">
@@ -694,20 +691,20 @@ function renderMetrics() {
   document.getElementById('val-losses').textContent = losses;
   document.getElementById('val-breakeven').textContent = breakeven;
 
-  // Gauge - show wins in green and losses in red
-  const gaugeCircle = document.getElementById('gauge-circle');
-  const gaugeCircleLoss = document.getElementById('gauge-circle-loss');
-  const circumference = 163.36;
+  // Gauge - semicircle showing wins in green and losses in red
+  const gaugeArc = document.getElementById('gauge-arc');
+  const gaugeArcLoss = document.getElementById('gauge-arc-loss');
+  const arcLength = 94.25; // Half circle arc length
   const lossRate = total > 0 ? (losses / total) * 100 : 0;
   
-  // Green circle shows wins starting from top
-  const winOffset = circumference * (1 - winRate / 100);
-  gaugeCircle.style.strokeDashoffset = winOffset;
+  // Green arc shows wins starting from left
+  const winOffset = arcLength * (1 - winRate / 100);
+  gaugeArc.style.strokeDashoffset = winOffset;
   
-  // Red circle shows losses - needs to be offset to start after wins
-  const lossLength = circumference * (lossRate / 100);
-  gaugeCircleLoss.style.strokeDasharray = `${lossLength} ${circumference}`;
-  gaugeCircleLoss.style.strokeDashoffset = -circumference * (winRate / 100);
+  // Red arc shows losses - needs to be offset to start after wins
+  const lossLength = arcLength * (lossRate / 100);
+  gaugeArcLoss.style.strokeDasharray = `${lossLength} ${arcLength}`;
+  gaugeArcLoss.style.strokeDashoffset = -arcLength * (winRate / 100);
 
   // Profit Factor
   const grossProfit = allTrades.filter(t=>t.pnl>0).reduce((s,t)=>s+t.pnl,0);
@@ -808,12 +805,12 @@ function renderCumulativeChart() {
       }},
       scales: {
         x: {
-          ticks: { color: '#3d4f63', maxTicksLimit: 8, font: { family: 'Sora', size: 10 }, maxRotation: 45 },
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Sora', size: 10 }, maxRotation: 45 },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         },
         y: {
-          ticks: { color: '#3d4f63', font: { family: 'Sora', size: 10 }, callback: v => formatCurrency(v) },
+          ticks: { color: '#8e8e8e', font: { family: 'Sora', size: 10 }, callback: v => formatCurrency(v) },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         }
@@ -867,12 +864,12 @@ function renderDailyChart() {
       },
       scales: {
         x: {
-          ticks: { color: '#3d4f63', maxTicksLimit: 8, font: { family: 'Sora', size: 10 }, maxRotation: 45 },
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Sora', size: 10 }, maxRotation: 45 },
           grid: { display: false },
           border: { color: '#1e252e' }
         },
         y: {
-          ticks: { color: '#3d4f63', font: { family: 'Sora', size: 10 }, callback: v => formatCurrency(v) },
+          ticks: { color: '#8e8e8e', font: { family: 'Sora', size: 10 }, callback: v => formatCurrency(v) },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         }
