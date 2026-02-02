@@ -18,7 +18,7 @@
     --red-dim: rgba(255,71,87,0.15);
     --text-primary: #ffffff;
     --text-secondary: #b4b4b4;
-    --text-muted: #3d4f63;
+    --text-muted: #8e8e8e;
     --accent: #00c9a7;
   }
 
@@ -270,8 +270,23 @@
     margin-bottom: 4px;
     text-align: right;
   }
-  .cal-day.today { background: rgba(230, 72, 72, 0.15); }
-  .cal-day.today .day-num { color: #e64848; font-weight: 600; }
+  .cal-day.today { background: transparent; }
+  .cal-day.today .day-num { 
+    color: #e64848; 
+    font-weight: 600;
+    position: relative;
+  }
+  .cal-day.today .day-num::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid #e64848;
+    border-radius: 50%;
+  }
   .cal-day .day-pnl {
     font-size: 13px;
     font-weight: 600;
@@ -358,31 +373,27 @@
     <div class="label">Net P&L </div>
     <div class="value" id="val-pnl">—</div>
   </div>
-  <div class="metric-card" id="card-winrate">
+  <div class="metric-card" id="card-winrate" style="position:relative;">
+    <svg class="gauge-svg" viewBox="0 0 64 64" style="position:absolute; top:20px; right:20px;">
+      <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
+      <circle cx="32" cy="32" r="26" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" id="gauge-circle-loss" transform="rotate(-90 32 32)"/>
+      <circle cx="32" cy="32" r="26" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="gauge-circle" transform="rotate(-90 32 32)"/>
+    </svg>
     <div class="label">Trade win % </div>
-    <div style="display:flex; align-items:center; gap:20px; margin-top:4px;">
-      <div class="value" id="val-winrate">—</div>
-      <svg class="gauge-svg" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
-        <circle cx="32" cy="32" r="26" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" id="gauge-circle-loss" transform="rotate(-90 32 32)"/>
-        <circle cx="32" cy="32" r="26" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="gauge-circle" transform="rotate(-90 32 32)"/>
-      </svg>
-    </div>
-    <div class="gauge-stats" style="margin-top:8px;">
+    <div class="value" id="val-winrate" style="margin-top:4px;">—</div>
+    <div class="gauge-stats" style="margin-top:12px;">
       <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div><div>Wins</div></div>
       <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div><div>B/E</div></div>
       <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div><div>Losses</div></div>
     </div>
   </div>
-  <div class="metric-card" id="card-pf">
+  <div class="metric-card" id="card-pf" style="position:relative;">
+    <svg class="gauge-svg" viewBox="0 0 64 64" style="position:absolute; top:20px; right:20px;">
+      <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
+      <circle cx="32" cy="32" r="26" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="pf-gauge-circle" transform="rotate(-90 32 32)"/>
+    </svg>
     <div class="label">Profit factor </div>
-    <div style="display:flex; align-items:center; gap:20px; margin-top:4px;">
-      <div class="value" id="val-pf">—</div>
-      <svg class="gauge-svg" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
-        <circle cx="32" cy="32" r="26" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="pf-gauge-circle" transform="rotate(-90 32 32)"/>
-      </svg>
-    </div>
+    <div class="value" id="val-pf" style="margin-top:4px;">—</div>
   </div>
   <div class="metric-card" id="card-avg">
     <div class="label">Avg win / loss trade </div>
