@@ -356,7 +356,6 @@
 <div class="config-bar">
   <span style="color:var(--text-muted);font-size:12px;">Loading trade data...</span>
   <span id="loadStatus" style="color:var(--green);font-size:12px;display:none;">✓ Data loaded</span>
-  <button onclick="loadData()" style="margin-left:auto;padding:6px 12px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);border-radius:6px;font-family:Sora;font-size:12px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='var(--bg-card-hover)'" onmouseout="this.style.background='var(--bg-card)'">↻ Refresh</button>
 </div>
 
 <!-- Metric Cards -->
@@ -467,25 +466,9 @@ async function loadData() {
       if (!res.ok) continue;
       const text = await res.text();
       if (text.length < 100) continue;
-      
-      // Properly destroy charts and reset canvases
-      if (cumulativeChart) {
-        cumulativeChart.destroy();
-        cumulativeChart = null;
-      }
-      if (dailyChart) {
-        dailyChart.destroy();
-        dailyChart = null;
-      }
-      
-      // Reset canvas elements to prevent size issues
-      const cumCanvas = document.getElementById('cumulativeChart');
-      const dailyCanvas = document.getElementById('dailyChart');
-      cumCanvas.style.width = '';
-      cumCanvas.style.height = '';
-      dailyCanvas.style.width = '';
-      dailyCanvas.style.height = '';
-      
+      // Destroy existing charts before re-rendering
+      if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
+      if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
       parseCSV(text);
       renderAll();
       statusEl.style.display = 'none';
