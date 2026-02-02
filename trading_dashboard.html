@@ -714,7 +714,7 @@ function renderCumulativeChart() {
       labels: labels,
       datasets: [{
         data: values,
-        borderColor: 'var(--green)',
+        borderColor: '#00c9a7',
         borderWidth: 2,
         pointRadius: 0,
         fill: true,
@@ -781,8 +781,8 @@ function renderDailyChart() {
     data: {
       labels: labels,
       datasets: [
-        { data: positives, backgroundColor: 'var(--green)', borderRadius: 2 },
-        { data: negatives, backgroundColor: 'var(--red)', borderRadius: 2 }
+        { data: positives, backgroundColor: '#00c9a7', borderRadius: 2 },
+        { data: negatives, backgroundColor: '#ff4757', borderRadius: 2 }
       ]
     },
     options: {
