@@ -16,8 +16,8 @@
     --green-dim: rgba(0,201,167,0.15);
     --red: #ff4757;
     --red-dim: rgba(255,71,87,0.15);
-    --text-primary: #eef0f2;
-    --text-secondary: #6b7a8d;
+    --text-primary: #ffffff;
+    --text-secondary: #9ca3af;
     --text-muted: #3d4f63;
     --accent: #00c9a7;
   }
@@ -29,7 +29,7 @@
     background: var(--bg-deep);
     color: var(--text-primary);
     min-height: 100vh;
-    padding: 28px 32px;
+    padding: 28px 96px;
   }
 
   /* Header */
@@ -106,14 +106,6 @@
     gap: 6px;
     margin-bottom: 10px;
   }
-  .metric-card .label .info-icon {
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    border: 1px solid var(--text-muted);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 9px; color: var(--text-muted);
-    cursor: pointer;
-  }
   .metric-card .value {
     font-size: 26px;
     font-weight: 700;
@@ -183,13 +175,6 @@
     display: flex;
     align-items: center;
     gap: 6px;
-  }
-  .chart-card .chart-title .info-icon {
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    border: 1px solid var(--text-muted);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 9px; color: var(--text-muted);
   }
   .chart-card canvas { width: 100% !important; }
 
@@ -283,7 +268,9 @@
     font-size: 11px;
     color: var(--text-muted);
     margin-bottom: 4px;
+    text-align: right;
   }
+  .cal-day.today { border: 2px solid #ff4757; }
   .cal-day.today .day-num { color: var(--accent); font-weight: 600; }
   .cal-day .day-pnl {
     font-size: 13px;
@@ -305,6 +292,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    margin-top: 27px;
   }
   .week-item {
     background: var(--bg-deep);
@@ -361,16 +349,17 @@
 <!-- Metric Cards -->
 <div class="metrics-row">
   <div class="metric-card" id="card-pnl">
-    <div class="label">Net P&L <span class="info-icon">i</span></div>
+    <div class="label">Net P&L </div>
     <div class="value" id="val-pnl">—</div>
   </div>
   <div class="metric-card" id="card-winrate">
-    <div class="label">Trade win % <span class="info-icon">i</span></div>
+    <div class="label">Trade win % </div>
     <div class="value" id="val-winrate">—</div>
     <div class="gauge-row">
       <svg class="gauge-svg" viewBox="0 0 64 64">
         <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
-        <circle cx="32" cy="32" r="26" fill="none" stroke="var(--green)" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="gauge-circle" transform="rotate(-90 32 32)"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" id="gauge-circle-loss" transform="rotate(-90 32 32)"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="gauge-circle" transform="rotate(-90 32 32)"/>
       </svg>
       <div class="gauge-stats">
         <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div><div>Wins</div></div>
@@ -380,7 +369,7 @@
     </div>
   </div>
   <div class="metric-card" id="card-pf">
-    <div class="label">Profit factor <span class="info-icon">i</span></div>
+    <div class="label">Profit factor </div>
     <div class="value" id="val-pf">—</div>
     <svg class="gauge-svg" viewBox="0 0 64 64" style="margin-top:8px;">
       <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
@@ -388,7 +377,7 @@
     </svg>
   </div>
   <div class="metric-card" id="card-avg">
-    <div class="label">Avg win / loss trade <span class="info-icon">i</span></div>
+    <div class="label">Avg win / loss trade </div>
     <div style="display:flex; gap:24px; margin-top:4px;">
       <div><div class="value positive" id="val-avgwin">—</div></div>
       <div><div class="value negative" id="val-avgloss">—</div></div>
@@ -405,13 +394,13 @@
 <div class="charts-row">
   <div class="chart-card">
     <div class="chart-header">
-      <div class="chart-title">Daily net cumulative P&L <span class="info-icon">i</span></div>
+      <div class="chart-title">Daily net cumulative P&L </div>
     </div>
     <canvas id="cumulativeChart" height="220"></canvas>
   </div>
   <div class="chart-card">
     <div class="chart-header">
-      <div class="chart-title">Net daily P&L <span class="info-icon">i</span></div>
+      <div class="chart-title">Net daily P&L </div>
     </div>
     <canvas id="dailyChart" height="220"></canvas>
   </div>
@@ -645,9 +634,13 @@ function renderMetrics() {
 
   // Gauge
   const gaugeCircle = document.getElementById('gauge-circle');
+  const gaugeCircleLoss = document.getElementById('gauge-circle-loss');
   const circumference = 163.36;
-  const offset = circumference * (1 - winRate / 100);
-  gaugeCircle.style.strokeDashoffset = offset;
+  const winOffset = circumference * (1 - winRate / 100);
+  const lossRate = total > 0 ? (losses / total) * 100 : 0;
+  const lossOffset = circumference * (1 - lossRate / 100);
+  gaugeCircle.style.strokeDashoffset = winOffset;
+  gaugeCircleLoss.style.strokeDashoffset = lossOffset;
 
   // Profit Factor
   const grossProfit = allTrades.filter(t=>t.pnl>0).reduce((s,t)=>s+t.pnl,0);
@@ -714,7 +707,7 @@ function renderCumulativeChart() {
       labels: labels,
       datasets: [{
         data: values,
-        borderColor: '#00c9a7',
+        borderColor: '#3b82f6',
         borderWidth: 2,
         pointRadius: 0,
         fill: true,
@@ -723,8 +716,8 @@ function renderCumulativeChart() {
           const {ctx: c, chartArea} = chart;
           if (!chartArea) return 'transparent';
           const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(0,201,167,0.3)');
-          gradient.addColorStop(1, 'rgba(0,201,167,0.0)');
+          gradient.addColorStop(0, 'rgba(59,130,246,0.3)');
+          gradient.addColorStop(1, 'rgba(59,130,246,0.0)');
           return gradient;
         },
         tension: 0.1
