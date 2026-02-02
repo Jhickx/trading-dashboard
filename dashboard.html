@@ -8,10 +8,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   /* ============================================================
-     CSS VARIABLES - CodePen Inspired Design System
+     CSS VARIABLES - CodePen-inspired Design System
      ============================================================ */
   :root {
-    /* Colors */
+    /* Colors - HSL based like CodePen */
     --color-bg-dark: hsl(0, 0%, 0%);
     --color-bg: hsl(0, 0%, 5%);
     --color-bg-light: hsl(0, 0%, 10%);
@@ -31,23 +31,27 @@
     /* Typography */
     --ff: "Manrope", sans-serif;
     
-    /* Spacing - CONSISTENT */
+    /* Spacing - Consistent */
     --rounded: 0.75rem;
     --card-padding: 1.5rem;
+    --spacing-xs: 0.5rem;
     --spacing-sm: 1rem;
     --spacing-md: 1.5rem;
     --spacing-lg: 2rem;
     
-    /* Legacy variable mapping */
+    /* Shadows */
+    --shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+    
+    /* Legacy aliases for compatibility */
     --bg-deep: var(--color-bg-dark);
     --bg-card: var(--color-bg);
     --border: var(--color-border);
     --green: var(--color-green);
     --red: var(--color-red);
-    --accent: var(--color-accent);
     --text-primary: var(--color-text);
     --text-secondary: var(--color-text-light);
     --text-muted: var(--color-text-muted);
+    --accent: var(--color-accent);
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -57,7 +61,10 @@
     background: var(--color-bg-dark);
     color: var(--color-text);
     min-height: 100vh;
-    padding: 28px 96px;
+    padding: var(--spacing-md) 0;
+    margin: 0 auto;
+    width: 95%;
+    max-width: 1400px;
   }
 
   /* Header */
@@ -65,29 +72,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: 28px;
   }
   .header h1 {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: -0.5px;
   }
   .header .subtitle {
-    color: var(--color-text-light);
+    color: var(--text-secondary);
     font-size: 13px;
     margin-top: 2px;
-  }
-
-  /* Shine effect - CodePen style */
-  .shine {
-    background: var(--gradient-card);
-    border: solid 1px var(--color-border);
-    border-top: 1px solid var(--color-border-light);
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
-    transition: background 0.2s ease;
-  }
-  .shine:hover {
-    background: var(--gradient-card-hover);
   }
 
   /* Config input for CSV URL */
@@ -95,65 +90,70 @@
     display: flex;
     gap: 10px;
     align-items: center;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: 24px;
   }
   .config-bar input {
     flex:1;
-    background: var(--color-bg-light);
-    border: 1px solid var(--color-border);
-    color: var(--color-text);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
     padding: 8px 14px;
-    border-radius: var(--rounded);
-    font-family: var(--ff);
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     outline: none;
   }
-  .config-bar input:focus { border-color: var(--color-accent); }
+  .config-bar input:focus { border-color: var(--accent); }
   .config-bar button {
-    background: var(--color-accent);
-    color: var(--color-bg-dark);
+    background: var(--accent);
+    color: #0a0c0f;
     border: none;
     padding: 8px 18px;
-    border-radius: var(--rounded);
-    font-family: var(--ff);
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
     font-weight: 600;
     font-size: 13px;
     cursor: pointer;
-    transition: opacity 0.2s;
   }
   .config-bar button:hover { opacity: 0.85; }
 
   /* Metric Cards */
   .metrics-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
   }
   .metric-card {
-    padding: var(--card-padding);
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow);
     border-radius: var(--rounded);
+    padding: var(--card-padding);
     position: relative;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    transition: background 0.2s ease;
+  }
+  .metric-card:hover {
+    background: var(--gradient-card-hover);
   }
   .metric-card .label {
-    font-size: 12px;
+    font-size: 0.75rem;
     color: var(--color-text-light);
     font-weight: 500;
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
   .metric-card .value {
-    font-size: 20px;
+    font-size: 26px;
     font-weight: 700;
-    letter-spacing: -0.5px;
+    letter-spacing: -1px;
   }
-  .metric-card .value.positive { color: var(--color-green); }
-  .metric-card .value.negative { color: var(--color-red); }
+  .metric-card .value.positive { color: var(--green); }
+  .metric-card .value.negative { color: var(--red); }
 
   /* Gauge styles */
   .gauge-row {
@@ -193,24 +193,32 @@
   /* Charts Row */
   .charts-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
   }
   .chart-card {
-    padding: var(--card-padding);
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow);
     border-radius: var(--rounded);
+    padding: var(--card-padding);
+    transition: background 0.2s ease;
+  }
+  .chart-card:hover {
+    background: var(--gradient-card-hover);
   }
   .chart-card .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
+    margin-bottom: var(--spacing-sm);
   }
   .chart-card .chart-title {
     font-size: 13px;
-    font-weight: 600;
-    color: var(--color-text-light);
+    font-weight: 500;
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     gap: 6px;
@@ -219,9 +227,11 @@
 
   /* Calendar */
   .calendar-section {
-    padding: var(--card-padding);
-    border-radius: var(--rounded);
-    margin-bottom: var(--spacing-lg);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
   }
   .calendar-nav {
     display: flex;
@@ -291,12 +301,13 @@
     letter-spacing: 0.5px;
   }
   .cal-day {
-    background: var(--bg-deep);
-    border-radius: 8px;
-    padding: 8px 6px;
-    min-height: 80px;
+    background: var(--color-bg-light);
+    border-radius: var(--rounded);
+    padding: var(--spacing-xs);
+    height: 90px;
     position: relative;
     border: 1px solid transparent;
+    overflow: hidden;
   }
   .cal-day.positive { background: rgba(0,201,167,0.08); border-color: rgba(0,201,167,0.2); }
   .cal-day.negative { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.2); }
@@ -342,17 +353,18 @@
     margin-top: 27px;
   }
   .week-item {
-    background: var(--bg-deep);
-    border-radius: 8px;
-    padding: 10px 12px;
-    flex: 1;
+    background: var(--color-bg-light);
+    border-radius: var(--rounded);
+    padding: var(--spacing-xs);
+    height: 90px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    text-align: center;
   }
   .week-item .week-label {
-    font-size: 11px;
-    color: var(--text-muted);
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
     margin-bottom: 3px;
   }
   .week-item .week-pnl {
@@ -401,11 +413,11 @@
 
 <!-- Metric Cards -->
 <div class="metrics-row">
-  <div class="metric-card shine" id="card-pnl">
+  <div class="metric-card" id="card-pnl">
     <div class="label">Net P&L </div>
     <div class="value" id="val-pnl">—</div>
   </div>
-  <div class="metric-card shine" id="card-winrate">
+  <div class="metric-card" id="card-winrate">
     <div class="label">Trade win % </div>
     <div class="value" id="val-winrate" style="margin-top:4px;">—</div>
     <div style="display:flex; flex-direction:column; align-items:center; margin-top:16px;">
@@ -445,13 +457,13 @@
 
 <!-- Charts -->
 <div class="charts-row">
-  <div class="chart-card shine">
+  <div class="chart-card">
     <div class="chart-header">
       <div class="chart-title">Daily net cumulative P&L </div>
     </div>
     <canvas id="cumulativeChart" height="220"></canvas>
   </div>
-  <div class="chart-card shine">
+  <div class="chart-card">
     <div class="chart-header">
       <div class="chart-title">Net daily P&L </div>
     </div>
@@ -460,7 +472,7 @@
 </div>
 
 <!-- Calendar -->
-<div class="calendar-section shine">
+<div class="calendar-section">
   <div class="calendar-nav">
     <div class="nav-left">
       <button class="nav-btn" onclick="changeMonth(-1)">&#8592;</button>
