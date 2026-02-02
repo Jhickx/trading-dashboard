@@ -496,36 +496,36 @@ function applyDateFilter() {
 // ============================================================
 // LOAD & PARSE CSV
 // ============================================================
-const GVIZ_URL = 'https://docs.google.com/spreadsheets/d/1lr6NH8wkv0lZvuriRLG2nCSlg-VGH6D6JA5sxDE7Bus/gviz/tq?tqx=out:csv&gid=653744386';
 const PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_owNsVgezKK00Z8HGehudo_5gqajVxvCqMCeCCwSwkDhx9484DVHY3z9hWMds2ime/pub?gid=653744386&single=true&output=csv';
 
 async function loadData() {
   const statusEl = document.querySelector('.config-bar span:first-child');
   const successEl = document.getElementById('loadStatus');
 
-  const urls = [PUB_URL, GVIZ_URL];
-
-  for (const url of urls) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) continue;
-      const text = await res.text();
-      if (text.length < 100) continue;
-      // Destroy existing charts before re-rendering
-      if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
-      if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
-      parseCSV(text);
-      renderAll();
-      statusEl.style.display = 'none';
-      successEl.style.display = 'inline';
-      return; // Stop after first success
-    } catch(e) {
-      continue;
+  try {
+    const res = await fetch(PUB_URL);
+    if (!res.ok) {
+      statusEl.textContent = '⚠ Failed to load data';
+      statusEl.style.color = 'var(--red)';
+      return;
     }
+    const text = await res.text();
+    if (text.length < 100) {
+      statusEl.textContent = '⚠ Failed to load data';
+      statusEl.style.color = 'var(--red)';
+      return;
+    }
+    // Destroy existing charts before re-rendering
+    if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
+    if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
+    parseCSV(text);
+    renderAll();
+    statusEl.style.display = 'none';
+    successEl.style.display = 'inline';
+  } catch(e) {
+    statusEl.textContent = '⚠ Failed to load data';
+    statusEl.style.color = 'var(--red)';
   }
-
-  statusEl.textContent = '⚠ Failed to load data';
-  statusEl.style.color = 'var(--red)';
 }
 
 // Auto-load on page open
