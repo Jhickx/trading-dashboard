@@ -17,7 +17,7 @@
     --red: #ff4757;
     --red-dim: rgba(255,71,87,0.15);
     --text-primary: #ffffff;
-    --text-secondary: #9ca3af;
+    --text-secondary: #b4b4b4;
     --text-muted: #3d4f63;
     --accent: #00c9a7;
   }
@@ -270,8 +270,8 @@
     margin-bottom: 4px;
     text-align: right;
   }
-  .cal-day.today { border: 2px solid #ff4757; }
-  .cal-day.today .day-num { color: var(--accent); font-weight: 600; }
+  .cal-day.today { background: rgba(230, 72, 72, 0.15); }
+  .cal-day.today .day-num { color: #e64848; font-weight: 600; }
   .cal-day .day-pnl {
     font-size: 13px;
     font-weight: 600;
@@ -339,6 +339,12 @@
     <h1>Trading Dashboard</h1>
     <div class="subtitle">Performance overview & analytics</div>
   </div>
+  <div style="display:flex; gap:12px; align-items:center;">
+    <input type="date" id="dateFrom" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Sora;font-size:12px;" />
+    <span style="color:var(--text-secondary);">to</span>
+    <input type="date" id="dateTo" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Sora;font-size:12px;" />
+    <button onclick="applyDateFilter()" style="background:var(--accent);color:#0a0c0f;border:none;padding:8px 16px;border-radius:8px;font-family:Sora;font-weight:600;font-size:12px;cursor:pointer;">Apply</button>
+  </div>
 </div>
 
 <div class="config-bar">
@@ -354,27 +360,29 @@
   </div>
   <div class="metric-card" id="card-winrate">
     <div class="label">Trade win % </div>
-    <div class="value" id="val-winrate">—</div>
-    <div class="gauge-row">
+    <div style="display:flex; align-items:center; gap:20px; margin-top:4px;">
+      <div class="value" id="val-winrate">—</div>
       <svg class="gauge-svg" viewBox="0 0 64 64">
         <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
         <circle cx="32" cy="32" r="26" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" id="gauge-circle-loss" transform="rotate(-90 32 32)"/>
         <circle cx="32" cy="32" r="26" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="gauge-circle" transform="rotate(-90 32 32)"/>
       </svg>
-      <div class="gauge-stats">
-        <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div><div>Wins</div></div>
-        <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div><div>B/E</div></div>
-        <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div><div>Losses</div></div>
-      </div>
+    </div>
+    <div class="gauge-stats" style="margin-top:8px;">
+      <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div><div>Wins</div></div>
+      <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div><div>B/E</div></div>
+      <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div><div>Losses</div></div>
     </div>
   </div>
   <div class="metric-card" id="card-pf">
     <div class="label">Profit factor </div>
-    <div class="value" id="val-pf">—</div>
-    <svg class="gauge-svg" viewBox="0 0 64 64" style="margin-top:8px;">
-      <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
-      <circle cx="32" cy="32" r="26" fill="none" stroke="var(--green)" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="pf-gauge-circle" transform="rotate(-90 32 32)"/>
-    </svg>
+    <div style="display:flex; align-items:center; gap:20px; margin-top:4px;">
+      <div class="value" id="val-pf">—</div>
+      <svg class="gauge-svg" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="pf-gauge-circle" transform="rotate(-90 32 32)"/>
+      </svg>
+    </div>
   </div>
   <div class="metric-card" id="card-avg">
     <div class="label">Avg win / loss trade </div>
@@ -431,11 +439,51 @@
 // DATA STORE
 // ============================================================
 let allTrades = [];
+let allTradesUnfiltered = []; // Store original unfiltered data
 let dailyData = {}; // { "2026-01-21": { pnl, tradeCount, wins, losses } }
 let calendarMonth = new Date().getMonth();
 let calendarYear = new Date().getFullYear();
 let cumulativeChart = null;
 let dailyChart = null;
+let dateFilterFrom = null;
+let dateFilterTo = null;
+
+// ============================================================
+// DATE FILTER
+// ============================================================
+function applyDateFilter() {
+  const fromInput = document.getElementById('dateFrom').value;
+  const toInput = document.getElementById('dateTo').value;
+  
+  dateFilterFrom = fromInput ? new Date(fromInput + 'T00:00:00') : null;
+  dateFilterTo = toInput ? new Date(toInput + 'T23:59:59') : null;
+  
+  // Filter allTrades
+  if (dateFilterFrom || dateFilterTo) {
+    allTrades = allTradesUnfiltered.filter(t => {
+      if (dateFilterFrom && t.date < dateFilterFrom) return false;
+      if (dateFilterTo && t.date > dateFilterTo) return false;
+      return true;
+    });
+  } else {
+    allTrades = [...allTradesUnfiltered];
+  }
+  
+  // Rebuild dailyData from filtered trades
+  dailyData = {};
+  allTrades.forEach(t => {
+    if (!dailyData[t.dateKey]) {
+      dailyData[t.dateKey] = { pnl: 0, tradeCount: 0, wins: 0, losses: 0, breakeven: 0 };
+    }
+    dailyData[t.dateKey].pnl += t.pnl;
+    dailyData[t.dateKey].tradeCount += 1;
+    if (t.pnl > 0) dailyData[t.dateKey].wins += 1;
+    else if (t.pnl < 0) dailyData[t.dateKey].losses += 1;
+    else dailyData[t.dateKey].breakeven += 1;
+  });
+  
+  renderAll();
+}
 
 // ============================================================
 // LOAD & PARSE CSV
@@ -499,6 +547,7 @@ function parseCSV(text) {
   const lines = text.trim().split('\n');
   const headers = parseCSVLine(lines[0]);
   allTrades = [];
+  allTradesUnfiltered = [];
   dailyData = {};
 
   // Find column indices
@@ -539,7 +588,9 @@ function parseCSV(text) {
     const ticker = cols[tickerIdx] || '';
     const direction = cols[directionIdx] || '';
 
-    allTrades.push({ date, dateKey, pnl, winLoss, ticker, direction });
+    const trade = { date, dateKey, pnl, winLoss, ticker, direction };
+    allTrades.push(trade);
+    allTradesUnfiltered.push(trade);
 
     if (!dailyData[dateKey]) {
       dailyData[dateKey] = { pnl: 0, tradeCount: 0, wins: 0, losses: 0, breakeven: 0 };
@@ -632,15 +683,20 @@ function renderMetrics() {
   document.getElementById('val-losses').textContent = losses;
   document.getElementById('val-breakeven').textContent = breakeven;
 
-  // Gauge
+  // Gauge - show wins in green and losses in red
   const gaugeCircle = document.getElementById('gauge-circle');
   const gaugeCircleLoss = document.getElementById('gauge-circle-loss');
   const circumference = 163.36;
-  const winOffset = circumference * (1 - winRate / 100);
   const lossRate = total > 0 ? (losses / total) * 100 : 0;
-  const lossOffset = circumference * (1 - lossRate / 100);
+  
+  // Green circle shows wins starting from top
+  const winOffset = circumference * (1 - winRate / 100);
   gaugeCircle.style.strokeDashoffset = winOffset;
-  gaugeCircleLoss.style.strokeDashoffset = lossOffset;
+  
+  // Red circle shows losses - needs to be offset to start after wins
+  const lossLength = circumference * (lossRate / 100);
+  gaugeCircleLoss.style.strokeDasharray = `${lossLength} ${circumference}`;
+  gaugeCircleLoss.style.strokeDashoffset = -circumference * (winRate / 100);
 
   // Profit Factor
   const grossProfit = allTrades.filter(t=>t.pnl>0).reduce((s,t)=>s+t.pnl,0);
