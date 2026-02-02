@@ -4,519 +4,715 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Trading Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg-deep: #0a0c0f;
-    --bg-card: #111418;
-    --bg-card-hover: #161b22;
-    --border: #1e252e;
-    --green: #00c9a7;
-    --green-dim: rgba(0,201,167,0.15);
-    --red: #ff4757;
-    --red-dim: rgba(255,71,87,0.15);
-    --text-primary: #ffffff;
-    --text-secondary: #b4b4b4;
-    --text-muted: #8e8e8e;
-    --accent: #00c9a7;
-  }
+/* ============================================================
+   CSS VARIABLES - Design System
+   ============================================================ */
+:root {
+  /* Colors */
+  --color-bg-dark: hsl(0, 0%, 0%);
+  --color-bg: hsl(0, 0%, 5%);
+  --color-bg-light: hsl(0, 0%, 10%);
+  --color-border: hsl(0, 0%, 10%);
+  --color-border-light: hsl(0, 0%, 20%);
+  --color-text: hsl(0, 0%, 95%);
+  --color-text-light: hsl(0, 0%, 75%);
+  --color-text-muted: hsl(0, 0%, 55%);
+  --color-green: #00c9a7;
+  --color-red: #ff4757;
+  --color-accent: #00c9a7;
+  
+  /* Gradients */
+  --gradient-card: linear-gradient(0deg, var(--color-bg) 95%, var(--color-bg-light));
+  --gradient-card-hover: linear-gradient(0deg, var(--color-bg), var(--color-bg-light));
+  
+  /* Typography */
+  --ff: "Manrope", sans-serif;
+  --h1: 700 1.6rem/1em var(--ff);
+  --h2: 700 1.4rem/1em var(--ff);
+  --h3: 700 1.2rem/1em var(--ff);
+  --p: 400 1rem/1em var(--ff);
+  --small: 400 0.8rem/1em var(--ff);
+  
+  /* Spacing */
+  --rounded: 0.75rem;
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* Card padding - CONSISTENT across all cards */
+  --card-padding: 1.5rem;
+  
+  /* Shadows */
+  --shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+}
 
-  * { margin:0; padding:0; box-sizing:border-box; }
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
+body {
+  font-family: var(--ff);
+  font: var(--p);
+  background: var(--color-bg-dark);
+  color: var(--color-text);
+  margin: 0 auto;
+  width: 95%;
+  max-width: 1400px;
+  padding: var(--spacing-md) 0;
+}
+
+h1, h2, h3, h4, p { margin: 0; padding: 0; }
+h1 { font: var(--h1); }
+h2 { font: var(--h2); }
+h3 { font: var(--h3); color: var(--color-text); }
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+.shine {
+  background: var(--gradient-card);
+  border: solid 1px var(--color-border);
+  border-top: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow);
+  border-radius: var(--rounded);
+  transition: background 0.2s ease;
+}
+
+.shine:hover {
+  background: var(--gradient-card-hover);
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.header-subtitle {
+  color: var(--color-text-light);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.date-filter {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+.date-filter input {
+  background: var(--color-bg-light);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--rounded);
+  font-family: var(--ff);
+  font-size: 0.75rem;
+  outline: none;
+}
+
+.date-filter input:focus {
+  border-color: var(--color-accent);
+}
+
+.date-filter button {
+  background: var(--color-accent);
+  color: var(--color-bg-dark);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--rounded);
+  font-family: var(--ff);
+  font-weight: 600;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.date-filter button:hover {
+  opacity: 0.85;
+}
+
+.date-filter span {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* ============================================================
+   STATUS BAR
+   ============================================================ */
+.status-bar {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.status-success {
+  color: var(--color-green);
+}
+
+/* ============================================================
+   METRICS GRID
+   ============================================================ */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.metric-card {
+  padding: var(--card-padding);
+  position: relative;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+}
+
+.metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--color-text);
+}
+
+.metric-value.positive { color: var(--color-green); }
+.metric-value.negative { color: var(--color-red); }
+
+/* ============================================================
+   GAUGE COMPONENTS
+   ============================================================ */
+.gauge-container {
+  position: absolute;
+  top: var(--card-padding);
+  right: var(--card-padding);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gauge-stats {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.gauge-stat {
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.gauge-stat-value {
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.gauge-stat.win .gauge-stat-value { color: var(--color-green); }
+.gauge-stat.loss .gauge-stat-value { color: var(--color-red); }
+.gauge-stat.neutral .gauge-stat-value { color: var(--color-text-muted); }
+
+/* Avg Win/Loss Bar */
+.avg-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: 0.5rem;
+}
+
+.avg-bar-wrapper {
+  flex: 1;
+  min-width: 100px;
+}
+
+.avg-bar {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  gap: 3px;
+  margin-bottom: 0.5rem;
+}
+
+.avg-bar-part-win {
+  background: var(--color-green);
+  flex: 1;
+  border-radius: 3px;
+}
+
+.avg-bar-part-loss {
+  background: var(--color-red);
+  flex: 1;
+  border-radius: 3px;
+}
+
+.avg-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+}
+
+.avg-bar-labels .win { color: var(--color-green); }
+.avg-bar-labels .loss { color: var(--color-red); }
+
+/* ============================================================
+   CHARTS
+   ============================================================ */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.chart-card {
+  padding: var(--card-padding);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.chart-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-light);
+}
+
+.chart-canvas {
+  width: 100% !important;
+  height: 200px !important;
+}
+
+/* ============================================================
+   CALENDAR
+   ============================================================ */
+.calendar-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.calendar-nav button {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 1.25rem;
+}
+
+.calendar-nav button:hover {
+  color: var(--color-text);
+}
+
+.calendar-month {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.calendar-stats {
+  text-align: right;
+  font-size: 0.75rem;
+}
+
+.calendar-stats-pnl {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.calendar-stats-pnl.positive { color: var(--color-green); }
+.calendar-stats-pnl.negative { color: var(--color-red); }
+
+.calendar-stats-days {
+  color: var(--color-text-muted);
+}
+
+.calendar-wrapper {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.calendar-grid-container {
+  flex: 1;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day-header {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: var(--spacing-xs) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendar-day {
+  background: var(--color-bg-light);
+  border-radius: var(--rounded);
+  padding: var(--spacing-xs);
+  height: 90px;
+  position: relative;
+  border: 1px solid transparent;
+  overflow: hidden;
+}
+
+.calendar-day.positive {
+  background: rgba(0, 201, 167, 0.08);
+  border-color: rgba(0, 201, 167, 0.2);
+}
+
+.calendar-day.negative {
+  background: rgba(255, 71, 87, 0.08);
+  border-color: rgba(255, 71, 87, 0.2);
+}
+
+.calendar-day-num {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+  text-align: right;
+}
+
+.calendar-day.today .calendar-day-num {
+  color: #ffffff;
+  font-weight: 500;
+  background: #e64848;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  float: right;
+  clear: both;
+}
+
+.calendar-day.today .calendar-day-pnl {
+  clear: both;
+}
+
+.calendar-day-pnl {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.calendar-day-pnl.positive { color: var(--color-green); }
+.calendar-day-pnl.negative { color: var(--color-red); }
+
+.calendar-day-meta {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+/* Weekly Sidebar */
+.weekly-sidebar {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 27px;
+}
+
+.week-item {
+  background: var(--color-bg-light);
+  border-radius: var(--rounded);
+  padding: var(--spacing-xs);
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.week-label {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 3px;
+}
+
+.week-pnl {
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+.week-pnl.positive { color: var(--color-green); }
+.week-pnl.negative { color: var(--color-red); }
+
+.week-days {
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN
+   ============================================================ */
+@media (max-width: 1024px) {
   body {
-    font-family: 'Sora', sans-serif;
-    background: var(--bg-deep);
-    color: var(--text-primary);
-    min-height: 100vh;
-    padding: 28px 96px;
+    padding: var(--spacing-md) 0;
   }
+  
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  }
+}
 
-  /* Header */
+@media (max-width: 768px) {
+  body {
+    padding: var(--spacing-sm) 0;
+  }
+  
   .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 28px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
   }
-  .header h1 {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.5px;
+  
+  .date-filter {
+    width: 100%;
   }
-  .header .subtitle {
-    color: var(--text-secondary);
-    font-size: 13px;
-    margin-top: 2px;
+  
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
-
-  /* Config input for CSV URL */
-  .config-bar {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 24px;
+  
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
-  .config-bar input {
-    flex:1;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    outline: none;
-  }
-  .config-bar input:focus { border-color: var(--accent); }
-  .config-bar button {
-    background: var(--accent);
-    color: #0a0c0f;
-    border: none;
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-family: 'Sora', sans-serif;
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .config-bar button:hover { opacity: 0.85; }
-
-  /* Metric Cards */
-  .metrics-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .metric-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 20px 22px 18px 22px;
-    position: relative;
-    overflow: hidden;
-    display: flex;
+  
+  .calendar-wrapper {
     flex-direction: column;
   }
-  .metric-card .label {
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 8px;
-  }
-  .metric-card .value {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
-  .metric-card .value.positive { color: var(--green); }
-  .metric-card .value.negative { color: var(--red); }
-
-  /* Gauge styles */
-  .gauge-row {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-top: 4px;
-  }
-  .gauge-svg { width: 64px; height: 64px; }
-  .gauge-stats { display: flex; gap: 12px; }
-  .gauge-stat { font-size: 11px; }
-  .gauge-stat .gs-val { font-weight: 600; font-size: 13px; }
-  .gauge-stat.win .gs-val { color: var(--green); }
-  .gauge-stat.loss .gs-val { color: var(--red); }
-  .gauge-stat.neutral .gs-val { color: var(--text-secondary); }
-
-  /* Avg win/loss bar */
-  .avg-bar {
-    display: flex;
-    margin-top: 10px;
-    height: 6px;
-    border-radius: 3px;
-    overflow: hidden;
-    gap: 3px;
-  }
-  .avg-bar .win-part { background: var(--green); flex: 1; border-radius: 3px; }
-  .avg-bar .loss-part { background: var(--red); flex: 1; border-radius: 3px; }
-  .avg-bar-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-  }
-  .avg-bar-labels span { font-size: 11px; font-weight: 500; }
-  .avg-bar-labels .win-label { color: var(--green); }
-  .avg-bar-labels .loss-label { color: var(--red); }
-
-  /* Charts Row */
-  .charts-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-  .chart-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 22px 24px;
-  }
-  .chart-card .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-  }
-  .chart-card .chart-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .chart-card canvas { width: 100% !important; }
-
-  /* Calendar */
-  .calendar-section {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 24px;
-    margin-bottom: 24px;
-  }
-  .calendar-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .calendar-nav .nav-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .calendar-nav .month-title {
-    font-size: 16px;
-    font-weight: 600;
-  }
-  .nav-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    width: 30px; height: 30px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .nav-btn:hover { background: var(--bg-card-hover); }
-  .this-month-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
-    padding: 4px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: 'Sora', sans-serif;
-  }
-  .this-month-btn:hover { background: var(--bg-card-hover); }
-  .monthly-stats {
-    font-size: 13px;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .monthly-stats .ms-pnl { font-weight: 600; font-size: 14px; }
-  .monthly-stats .ms-pnl.positive { color: var(--green); }
-  .monthly-stats .ms-pnl.negative { color: var(--red); }
-  .monthly-stats .ms-days { color: var(--text-muted); font-size: 12px; }
-
-  .calendar-grid-wrapper {
-    display: flex;
-    gap: 16px;
-  }
-  .calendar-grid {
-    flex: 1;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-  }
-  .cal-header {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-align: center;
-    padding: 8px 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .cal-day {
-    background: var(--bg-deep);
-    border-radius: 8px;
-    padding: 8px 6px;
-    height: 90px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid transparent;
-  }
-  .cal-day.positive { background: rgba(0,201,167,0.08); border-color: rgba(0,201,167,0.2); }
-  .cal-day.negative { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.2); }
-  .cal-day.today { border-color: var(--accent); }
-  .cal-day .day-num {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 4px;
-    text-align: right;
-  }
-  .cal-day.today { background: transparent; }
-  .cal-day.today .day-num { 
-    color: #ffffff;
-    font-weight: 500;
-    background: #e64848;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    float: right;
-    clear: both;
-  }
-  .cal-day.today .day-pnl {
-    clear: both;
-  }
-  }
-  .cal-day .day-pnl {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-  }
-  .cal-day .day-pnl.positive { color: var(--green); }
-  .cal-day .day-pnl.negative { color: var(--red); }
-  .cal-day .day-meta {
-    font-size: 10px;
-    color: var(--text-muted);
-    margin-top: 2px;
-    line-height: 1.4;
-  }
-
-  /* Weekly sidebar */
+  
   .weekly-sidebar {
-    width: 120px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-top: 27px;
+    flex-direction: row;
+    width: 100%;
+    margin-top: var(--spacing-sm);
   }
+  
   .week-item {
-    background: var(--bg-deep);
-    border-radius: 8px;
-    padding: 10px 12px;
-    height: 90px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex: 1;
   }
-  .week-item .week-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 3px;
-  }
-  .week-item .week-pnl {
-    font-size: 14px;
-    font-weight: 600;
-  }
-  .week-item .week-pnl.positive { color: var(--green); }
-  .week-item .week-pnl.negative { color: var(--red); }
-  .week-item .week-days {
-    font-size: 10px;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
+}
 
-  /* Loading */
-  .loading {
-    color: var(--text-secondary);
-    font-size: 13px;
-    padding: 40px;
-    text-align: center;
-  }
-
-  /* Empty state for calendar days */
-  .cal-day.empty { opacity: 0.3; }
-  /* Responsive */
-  @media (max-width: 1024px) {
-    body {
-      padding: 28px 48px;
-    }
-    .metrics-row {
-      grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
-    }
+@media (max-width: 480px) {
+  body {
+    width: 100%;
+    padding: var(--spacing-sm);
   }
   
-  @media (max-width: 768px) {
-    body {
-      padding: 20px 24px;
-    }
-    .header {
-      margin-bottom: 20px;
-    }
-    .metrics-row {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    .charts-row {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    .calendar-grid-wrapper {
-      flex-direction: column;
-    }
-    .weekly-sidebar {
-      flex-direction: row;
-      width: 100%;
-      margin-top: 12px;
-    }
-    .week-item {
-      flex: 1;
-    }
+  .metric-card,
+  .chart-card {
+    padding: var(--spacing-sm);
   }
   
-  @media (max-width: 480px) {
-    body {
-      padding: 16px;
-    }
-    .metric-card {
-      padding: 16px 18px 14px 18px;
-    }
-    .chart-card {
-      padding: 18px 20px;
-    }
-    .value {
-      font-size: 22px;
-    }
+  .metric-value {
+    font-size: 1.125rem;
   }
+}
 </style>
 </head>
 <body>
 
+<!-- Header -->
 <div class="header">
   <div>
     <h1>Trading Dashboard</h1>
-    <div class="subtitle">Performance overview & analytics</div>
+    <div class="header-subtitle">Performance overview & analytics</div>
   </div>
-  <div style="display:flex; gap:12px; align-items:center;">
-    <input type="date" id="dateFrom" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Sora;font-size:12px;" />
-    <span style="color:var(--text-secondary);">to</span>
-    <input type="date" id="dateTo" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Sora;font-size:12px;" />
-    <button onclick="applyDateFilter()" style="background:var(--accent);color:#0a0c0f;border:none;padding:8px 16px;border-radius:8px;font-family:Sora;font-weight:600;font-size:12px;cursor:pointer;">Apply</button>
+  <div class="date-filter">
+    <input type="date" id="dateFrom" />
+    <span>to</span>
+    <input type="date" id="dateTo" />
+    <button onclick="applyDateFilter()">Apply</button>
   </div>
 </div>
 
-<div class="config-bar">
-  <span style="color:var(--text-muted);font-size:12px;">Loading trade data...</span>
-  <span id="loadStatus" style="color:var(--green);font-size:12px;display:none;">✓ Data loaded</span>
+<!-- Status Bar -->
+<div class="status-bar">
+  <span id="statusLoading">Loading trade data...</span>
+  <span id="statusSuccess" class="status-success" style="display:none;">✓ Data loaded</span>
 </div>
 
-<!-- Metric Cards -->
-<div class="metrics-row">
-  <div class="metric-card" id="card-pnl">
-    <div class="label">Net P&L </div>
-    <div class="value" id="val-pnl">—</div>
+<!-- Metrics Grid -->
+<div class="metrics-grid">
+  <!-- Net P&L -->
+  <div class="metric-card shine">
+    <div class="metric-label">Net P&L</div>
+    <div class="metric-value" id="val-pnl">—</div>
   </div>
-  <div class="metric-card" id="card-winrate" style="position:relative; padding-right:110px;">
-    <div class="label">Trade win % </div>
-    <div class="value" id="val-winrate" style="margin-top:4px;">—</div>
-    <div style="position:absolute; top:20px; right:20px; display:flex; flex-direction:column; align-items:center;">
-      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:70px; height:44px;">
-        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- Trade Win % -->
+  <div class="metric-card shine" style="position:relative; padding-right:110px;">
+    <div class="gauge-container">
+      <svg viewBox="0 0 80 50" style="width:70px; height:44px;">
+        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round"/>
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" id="gauge-arc-loss" stroke-dasharray="94.25" stroke-dashoffset="0"/>
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" id="gauge-arc" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
       </svg>
-      <div class="gauge-stats" style="margin-top:6px;">
-        <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div></div>
-        <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div></div>
-        <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div></div>
+      <div class="gauge-stats">
+        <div class="gauge-stat win">
+          <div class="gauge-stat-value" id="val-wins">0</div>
+        </div>
+        <div class="gauge-stat neutral">
+          <div class="gauge-stat-value" id="val-breakeven">0</div>
+        </div>
+        <div class="gauge-stat loss">
+          <div class="gauge-stat-value" id="val-losses">0</div>
+        </div>
       </div>
     </div>
+    <div class="metric-label">Trade win %</div>
+    <div class="metric-value" id="val-winrate">—</div>
   </div>
-  <div class="metric-card" id="card-pf" style="position:relative;">
-    <svg class="gauge-svg" viewBox="0 0 64 64" style="position:absolute; top:20px; right:20px;">
-      <circle cx="32" cy="32" r="26" fill="none" stroke="#1e252e" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
+  
+  <!-- Profit Factor -->
+  <div class="metric-card shine" style="position:relative;">
+    <svg viewBox="0 0 64 64" style="position:absolute; top:1.5rem; right:1.5rem; width:64px; height:64px;">
+      <circle cx="32" cy="32" r="26" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
       <circle cx="32" cy="32" r="26" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="pf-gauge-circle" transform="rotate(-90 32 32)"/>
     </svg>
-    <div class="label">Profit factor </div>
-    <div class="value" id="val-pf" style="margin-top:4px;">—</div>
+    <div class="metric-label">Profit factor</div>
+    <div class="metric-value" id="val-pf">—</div>
   </div>
-  <div class="metric-card" id="card-avg">
-    <div class="label">Avg win / loss trade </div>
-    <div style="display:flex; align-items:center; gap:16px; margin-top:4px;">
-      <div class="value" id="val-ratio" style="font-size:20px; white-space:nowrap;">—</div>
-      <div style="flex:1; min-width:100px;">
-        <div class="avg-bar" id="avg-bar"><div class="win-part"></div><div class="loss-part"></div></div>
+  
+  <!-- Avg Win / Loss -->
+  <div class="metric-card shine">
+    <div class="metric-label">Avg win / loss trade</div>
+    <div class="avg-container">
+      <div class="metric-value" id="val-ratio" style="font-size:1rem; white-space:nowrap;">—</div>
+      <div class="avg-bar-wrapper">
+        <div class="avg-bar">
+          <div class="avg-bar-part-win" id="avg-bar-win"></div>
+          <div class="avg-bar-part-loss" id="avg-bar-loss"></div>
+        </div>
         <div class="avg-bar-labels">
-          <span class="win-label" id="label-avgwin">—</span>
-          <span class="loss-label" id="label-avgloss">—</span>
+          <span class="win" id="label-avgwin">—</span>
+          <span class="loss" id="label-avgloss">—</span>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Charts -->
-<div class="charts-row">
-  <div class="chart-card">
+<!-- Charts Grid -->
+<div class="charts-grid">
+  <!-- Cumulative P&L Chart -->
+  <div class="chart-card shine">
     <div class="chart-header">
-      <div class="chart-title">Daily net cumulative P&L </div>
+      <div class="chart-title">Daily net cumulative P&L</div>
     </div>
-    <canvas id="cumulativeChart" height="220"></canvas>
+    <canvas id="cumulativeChart" class="chart-canvas"></canvas>
   </div>
-  <div class="chart-card">
+  
+  <!-- Daily P&L Chart -->
+  <div class="chart-card shine">
     <div class="chart-header">
-      <div class="chart-title">Net daily P&L </div>
+      <div class="chart-title">Net daily P&L</div>
     </div>
-    <canvas id="dailyChart" height="220"></canvas>
+    <canvas id="dailyChart" class="chart-canvas"></canvas>
   </div>
 </div>
 
-<!-- Calendar -->
+<!-- Calendar Section -->
 <div class="calendar-section">
-  <div class="calendar-nav">
-    <div class="nav-left">
-      <button class="nav-btn" onclick="changeMonth(-1)">&#8592;</button>
-      <span class="month-title" id="cal-month-title">January 2026</span>
-      <button class="nav-btn" onclick="changeMonth(1)">&#8594;</button>
-      <button class="this-month-btn" onclick="goToThisMonth()">This month</button>
+  <div class="calendar-header">
+    <div class="calendar-nav">
+      <button onclick="changeMonth(-1)">←</button>
+      <div class="calendar-month" id="calendarMonth">February 2026</div>
+      <button onclick="changeMonth(1)">→</button>
+      <button onclick="goToCurrentMonth()" style="margin-left:0.5rem; padding:0.25rem 0.75rem; background:var(--color-bg-light); border-radius:var(--rounded); font-size:0.75rem;">This month</button>
     </div>
-    <div class="monthly-stats">
-      <span class="ms-pnl positive" id="cal-monthly-pnl">$0</span>
-      <span class="ms-days" id="cal-trading-days">0 days</span>
+    <div class="calendar-stats">
+      <div class="calendar-stats-pnl" id="monthlyPnl">$0.00</div>
+      <div class="calendar-stats-days" id="monthlyDays">0 days</div>
     </div>
   </div>
-  <div class="calendar-grid-wrapper">
-    <div class="calendar-grid" id="calendarGrid"></div>
+  
+  <div class="calendar-wrapper">
+    <div class="calendar-grid-container">
+      <div class="calendar-grid">
+        <div class="calendar-day-header">Mon</div>
+        <div class="calendar-day-header">Tue</div>
+        <div class="calendar-day-header">Wed</div>
+        <div class="calendar-day-header">Thu</div>
+        <div class="calendar-day-header">Fri</div>
+        <div class="calendar-day-header">Sat</div>
+        <div class="calendar-day-header">Sun</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
     <div class="weekly-sidebar" id="weeklySidebar"></div>
   </div>
 </div>
 
 <script>
 // ============================================================
-// DATA STORE
+// GLOBAL STATE
 // ============================================================
 let allTrades = [];
-let allTradesUnfiltered = []; // Store original unfiltered data
-let dailyData = {}; // { "2026-01-21": { pnl, tradeCount, wins, losses } }
+let allTradesUnfiltered = [];
+let dailyData = {};
 let calendarMonth = new Date().getMonth();
 let calendarYear = new Date().getFullYear();
 let cumulativeChart = null;
 let dailyChart = null;
 let dateFilterFrom = null;
 let dateFilterTo = null;
+
+const PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_owNsVgezKK00Z8HGehudo_5gqajVxvCqMCeCCwSwkDhx9484DVHY3z9hWMds2ime/pub?gid=653744386&single=true&output=csv';
+const GVIZ_URL = 'https://docs.google.com/spreadsheets/d/1lr6NH8wkv0lZvuriRLG2nCSlg-VGH6D6JA5sxDE7Bus/gviz/tq?tqx=out:csv&gid=653744386';
 
 // ============================================================
 // DATE FILTER
@@ -528,7 +724,6 @@ function applyDateFilter() {
   dateFilterFrom = fromInput ? new Date(fromInput + 'T00:00:00') : null;
   dateFilterTo = toInput ? new Date(toInput + 'T23:59:59') : null;
   
-  // Filter allTrades
   if (dateFilterFrom || dateFilterTo) {
     allTrades = allTradesUnfiltered.filter(t => {
       if (dateFilterFrom && t.date < dateFilterFrom) return false;
@@ -539,7 +734,6 @@ function applyDateFilter() {
     allTrades = [...allTradesUnfiltered];
   }
   
-  // Rebuild dailyData from filtered trades
   dailyData = {};
   allTrades.forEach(t => {
     if (!dailyData[t.dateKey]) {
@@ -556,76 +750,56 @@ function applyDateFilter() {
 }
 
 // ============================================================
-// LOAD & PARSE CSV
+// LOAD DATA
 // ============================================================
-const PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_owNsVgezKK00Z8HGehudo_5gqajVxvCqMCeCCwSwkDhx9484DVHY3z9hWMds2ime/pub?gid=653744386&single=true&output=csv';
-
 async function loadData() {
-  const statusEl = document.querySelector('.config-bar span:first-child');
-  const successEl = document.getElementById('loadStatus');
+  const statusLoading = document.getElementById('statusLoading');
+  const statusSuccess = document.getElementById('statusSuccess');
 
-  console.log('Starting data load...');
-  console.log('Fetching URL:', PUB_URL);
-  
-  try {
-    const res = await fetch(PUB_URL);
-    console.log('Fetch response:', res.status, res.statusText);
-    
-    if (!res.ok) {
-      console.error('Response not OK:', res.status);
-      statusEl.textContent = '⚠ Failed to load data (status: ' + res.status + ')';
-      statusEl.style.color = 'var(--red)';
+  const urls = [PUB_URL, GVIZ_URL];
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const text = await res.text();
+      if (text.length < 100) continue;
+      
+      if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
+      if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
+      
+      parseCSV(text);
+      renderAll();
+      
+      statusLoading.style.display = 'none';
+      statusSuccess.style.display = 'inline';
       return;
+    } catch(e) {
+      continue;
     }
-    
-    const text = await res.text();
-    console.log('Text length:', text.length);
-    console.log('First 200 chars:', text.substring(0, 200));
-    
-    if (text.length < 100) {
-      console.error('Response too short');
-      statusEl.textContent = '⚠ Failed to load data (empty)';
-      statusEl.style.color = 'var(--red)';
-      return;
-    }
-    
-    console.log('Parsing CSV...');
-    // Destroy existing charts before re-rendering
-    if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
-    if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
-    parseCSV(text);
-    console.log('Parsed trades:', allTrades.length);
-    
-    console.log('Rendering...');
-    renderAll();
-    console.log('Render complete');
-    
-    statusEl.style.display = 'none';
-    successEl.style.display = 'inline';
-  } catch(e) {
-    console.error('Load error:', e);
-    statusEl.textContent = '⚠ Failed to load data: ' + e.message;
-    statusEl.style.color = 'var(--red)';
   }
+
+  statusLoading.textContent = '⚠ Failed to load data';
+  statusLoading.style.color = 'var(--color-red)';
 }
 
-// Auto-load on page open
-loadData();
-
-
+// ============================================================
+// CSV PARSER
+// ============================================================
 function parseCSVLine(line) {
   const result = [];
   let current = '';
   let inQuotes = false;
+  
   for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
+    const char = line[i];
+    if (char === '"') {
       inQuotes = !inQuotes;
-    } else if (ch === ',' && !inQuotes) {
+    } else if (char === ',' && !inQuotes) {
       result.push(current.trim());
       current = '';
     } else {
-      current += ch;
+      current += char;
     }
   }
   result.push(current.trim());
@@ -639,41 +813,37 @@ function parseCSV(text) {
   allTradesUnfiltered = [];
   dailyData = {};
 
-  // Find column indices
-  // Expecting: Trade ID, Account, Open date, Open Time, Ticker, Direction, Win/Loss, % Risk, % PnL, R, PnL, Learnings
-  const dateIdx = headers.findIndex(h => h.toLowerCase().includes('open date') || h.toLowerCase().includes('date'));
+  const dateIdx = headers.findIndex(h => h.toLowerCase().includes('open date'));
   const pnlIdx = headers.findIndex(h => h.toLowerCase() === 'pnl');
-  const winlossIdx = headers.findIndex(h => h.toLowerCase().includes('win/loss'));
-  const tickerIdx = headers.findIndex(h => h.toLowerCase().includes('ticker'));
-  const directionIdx = headers.findIndex(h => h.toLowerCase().includes('direction'));
+  const winLossIdx = headers.findIndex(h => h.toLowerCase().includes('win/loss'));
+  const tickerIdx = headers.findIndex(h => h.toLowerCase() === 'ticker');
+  const directionIdx = headers.findIndex(h => h.toLowerCase() === 'direction');
 
   for (let i = 1; i < lines.length; i++) {
     const cols = parseCSVLine(lines[i]);
-    const dateStr = cols[dateIdx];
-    const pnlStr = cols[pnlIdx];
-
-    if (!dateStr || !pnlStr) continue;
-
-    // Parse PnL: remove $, spaces, handle negative, handle European decimals
-    let pnlClean = pnlStr.replace(/[$\s]/g,'').replace(/'/g,'');
-    // Detect if using European number format (period as thousands, comma as decimal)
-    // e.g. "1.471,95" or "-1.471,95"
-    if (pnlClean.includes(',') && pnlClean.includes('.')) {
-      // European: remove dots (thousands separator), replace comma with dot
-      pnlClean = pnlClean.replace(/\./g,'').replace(',','.');
-    } else if (pnlClean.includes(',')) {
-      // Could be European decimal: "195,09"
-      pnlClean = pnlClean.replace(',','.');
-    }
-    const pnl = parseFloat(pnlClean);
-    if (isNaN(pnl)) continue;
-
-    // Parse date: "21 jan 26" or similar
-    const date = parseDate(dateStr);
-    if (!date) continue;
-
-    const dateKey = formatDateKey(date);
-    const winLoss = cols[winlossIdx] ? cols[winlossIdx].toLowerCase() : '';
+    
+    const dateStr = cols[dateIdx] || '';
+    if (!dateStr) continue;
+    
+    const pnlStr = (cols[pnlIdx] || '').replace(/[^0-9,.-]/g, '').replace(',', '.');
+    const pnl = parseFloat(pnlStr) || 0;
+    
+    const parts = dateStr.trim().split(/\s+/);
+    if (parts.length < 3) continue;
+    
+    const day = parseInt(parts[0]);
+    const monthMap = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+    const monthStr = parts[1].toLowerCase();
+    const month = monthMap[monthStr];
+    if (month === undefined) continue;
+    
+    const yearShort = parseInt(parts[2]);
+    const year = yearShort < 100 ? 2000 + yearShort : yearShort;
+    
+    const date = new Date(year, month, day);
+    const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    
+    const winLoss = cols[winLossIdx] || '';
     const ticker = cols[tickerIdx] || '';
     const direction = cols[directionIdx] || '';
 
@@ -692,52 +862,15 @@ function parseCSV(text) {
   }
 }
 
-function parseDate(str) {
-  // Handle "21 jan 26", "21 jan 2026", etc.
-  const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-  const parts = str.trim().split(/[\s\/\-]+/);
-  if (parts.length >= 3) {
-    let day, month, year;
-    // Try "21 jan 26"
-    if (isNaN(parts[1]) && months[parts[1].toLowerCase()] !== undefined) {
-      day = parseInt(parts[0]);
-      month = months[parts[1].toLowerCase()];
-      year = parseInt(parts[2]);
-      if (year < 100) year += 2000;
-    }
-    // Try "jan 21 26" or other formats
-    else if (isNaN(parts[0]) && months[parts[0].toLowerCase()] !== undefined) {
-      month = months[parts[0].toLowerCase()];
-      day = parseInt(parts[1]);
-      year = parseInt(parts[2]);
-      if (year < 100) year += 2000;
-    }
-    if (day && month !== undefined && year) {
-      return new Date(year, month, day);
-    }
-  }
-  // Fallback: try native parse
-  const d = new Date(str);
-  if (!isNaN(d.getTime())) return d;
-  return null;
-}
-
-function formatDateKey(date) {
-  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-}
-
+// ============================================================
+// UTILITIES
+// ============================================================
 function formatCurrency(val) {
-  const abs = Math.abs(val);
-  let str;
-  if (abs >= 1000) str = '$' + (abs/1000).toFixed(1) + 'K';
-  else str = '$' + abs.toFixed(2);
-  return (val < 0 ? '-' : '') + str;
-}
-
-function formatCurrencyFull(val) {
-  const sign = val < 0 ? '-' : '';
-  const abs = Math.abs(val);
-  return sign + '$' + abs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const absVal = Math.abs(val);
+  if (absVal >= 1000) {
+    return '$' + (val/1000).toFixed(1) + 'K';
+  }
+  return '$' + val.toFixed(2);
 }
 
 // ============================================================
@@ -751,16 +884,13 @@ function renderAll() {
 }
 
 // ============================================================
-// METRICS
+// RENDER METRICS
 // ============================================================
 function renderMetrics() {
-  // Net PnL
-  const totalPnl = allTrades.reduce((s,t) => s + t.pnl, 0);
-  const pnlEl = document.getElementById('val-pnl');
-  pnlEl.textContent = formatCurrencyFull(totalPnl);
-  pnlEl.className = 'value ' + (totalPnl >= 0 ? 'positive' : 'negative');
+  const totalPnl = allTrades.reduce((sum, t) => sum + t.pnl, 0);
+  document.getElementById('val-pnl').textContent = formatCurrency(totalPnl);
+  document.getElementById('val-pnl').className = 'metric-value ' + (totalPnl >= 0 ? 'positive' : 'negative');
 
-  // Win rate
   const wins = allTrades.filter(t => t.pnl > 0).length;
   const losses = allTrades.filter(t => t.pnl < 0).length;
   const breakeven = allTrades.filter(t => t.pnl === 0).length;
@@ -772,37 +902,31 @@ function renderMetrics() {
   document.getElementById('val-losses').textContent = losses;
   document.getElementById('val-breakeven').textContent = breakeven;
 
-  // Gauge - semicircle showing wins in green and losses in red
   const gaugeArc = document.getElementById('gauge-arc');
   const gaugeArcLoss = document.getElementById('gauge-arc-loss');
-  const arcLength = 94.25; // Half circle arc length
+  const arcLength = 94.25;
   const lossRate = total > 0 ? (losses / total) * 100 : 0;
   
-  // Green arc shows wins starting from left
   const winOffset = arcLength * (1 - winRate / 100);
   gaugeArc.style.strokeDashoffset = winOffset;
   
-  // Red arc shows losses - needs to be offset to start after wins
   const lossLength = arcLength * (lossRate / 100);
   gaugeArcLoss.style.strokeDasharray = `${lossLength} ${arcLength}`;
   gaugeArcLoss.style.strokeDashoffset = -arcLength * (winRate / 100);
 
-  // Profit Factor
-  const grossProfit = allTrades.filter(t=>t.pnl>0).reduce((s,t)=>s+t.pnl,0);
-  const grossLoss = Math.abs(allTrades.filter(t=>t.pnl<0).reduce((s,t)=>s+t.pnl,0));
-  const pf = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? Infinity : 0);
-  const pfEl = document.getElementById('val-pf');
-  pfEl.textContent = pf === Infinity ? '∞' : pf.toFixed(2);
-  pfEl.className = 'value ' + (pf >= 1 ? 'positive' : 'negative');
+  const grossProfit = allTrades.filter(t => t.pnl > 0).reduce((sum, t) => sum + t.pnl, 0);
+  const grossLoss = Math.abs(allTrades.filter(t => t.pnl < 0).reduce((sum, t) => sum + t.pnl, 0));
+  const pf = grossLoss > 0 ? grossProfit / grossLoss : 0;
 
-  // PF gauge (cap at 3 for visual)
+  document.getElementById('val-pf').textContent = pf > 0 ? pf.toFixed(2) : '—';
+  document.getElementById('val-pf').className = 'metric-value ' + (pf >= 1 ? 'positive' : 'negative');
+
   const pfGauge = document.getElementById('pf-gauge-circle');
-  const pfCircumference = 163.36; // Full circle for PF gauge
+  const pfCircumference = 163.36;
   const pfPercent = Math.min(pf / 3, 1);
   pfGauge.style.strokeDashoffset = pfCircumference * (1 - pfPercent);
   pfGauge.style.stroke = pf >= 1 ? '#00c9a7' : '#ff4757';
 
-  // Avg win / loss
   const avgWin = wins > 0 ? grossProfit / wins : 0;
   const avgLoss = losses > 0 ? grossLoss / losses : 0;
   const ratio = avgLoss > 0 ? avgWin / avgLoss : 0;
@@ -811,21 +935,19 @@ function renderMetrics() {
   document.getElementById('label-avgwin').textContent = formatCurrency(avgWin);
   document.getElementById('label-avgloss').textContent = '-' + formatCurrency(avgLoss);
 
-  // Avg bar ratio
-  const winPart = document.querySelector('.avg-bar .win-part');
-  const lossPart = document.querySelector('.avg-bar .loss-part');
-  const total2 = avgWin + avgLoss;
-  if (total2 > 0) {
-    winPart.style.flex = (avgWin / total2);
-    lossPart.style.flex = (avgLoss / total2);
+  const winPart = document.getElementById('avg-bar-win');
+  const lossPart = document.getElementById('avg-bar-loss');
+  const totalAvg = avgWin + avgLoss;
+  if (totalAvg > 0) {
+    winPart.style.flex = (avgWin / totalAvg);
+    lossPart.style.flex = (avgLoss / totalAvg);
   }
 }
 
 // ============================================================
-// CUMULATIVE CHART
+// RENDER CUMULATIVE CHART
 // ============================================================
 function renderCumulativeChart() {
-  // Build sorted daily timeline
   const keys = Object.keys(dailyData).sort();
   if (keys.length === 0) return;
 
@@ -833,21 +955,21 @@ function renderCumulativeChart() {
   const values = [];
   let cumulative = 0;
 
-  // Generate all dates from first trade to last trade
-  const start = new Date(keys[0]);
-  const end = new Date(keys[keys.length-1]);
-  const d = new Date(start);
-  while (d <= end) {
-    const key = formatDateKey(d);
-    if (dailyData[key]) cumulative += dailyData[key].pnl;
-    labels.push(d.getDate() + '/' + (d.getMonth()+1) + '/' + String(d.getFullYear()).slice(-2));
+  const firstDate = new Date(keys[0]);
+  const lastDate = new Date(keys[keys.length - 1]);
+  
+  for (let d = new Date(firstDate); d <= lastDate; d.setDate(d.getDate() + 1)) {
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const day = dailyData[key];
+    if (day) {
+      cumulative += day.pnl;
+    }
+    const label = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(2)}`;
+    labels.push(label);
     values.push(cumulative);
-    d.setDate(d.getDate()+1);
   }
 
   const ctx = document.getElementById('cumulativeChart').getContext('2d');
-  if (cumulativeChart) cumulativeChart.destroy();
-
   cumulativeChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -855,47 +977,25 @@ function renderCumulativeChart() {
       datasets: [{
         data: values,
         borderColor: '#3b82f6',
-        borderWidth: 2,
-        pointRadius: 0,
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
         fill: true,
-        backgroundColor: function(context) {
-          const chart = context.chart;
-          const {ctx: c, chartArea} = chart;
-          if (!chartArea) return 'transparent';
-          const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(59,130,246,0.3)');
-          gradient.addColorStop(1, 'rgba(59,130,246,0.0)');
-          return gradient;
-        },
-        tension: 0.1
+        pointRadius: 0,
+        borderWidth: 2
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      plugins: { legend: { display: false }, tooltip: {
-        backgroundColor: '#1a2230',
-        titleColor: '#6b7a8d',
-        bodyColor: '#eef0f2',
-        borderColor: '#1e252e',
-        borderWidth: 1,
-        titleFont: { family: 'Sora', size: 11 },
-        bodyFont: { family: 'Sora', size: 13, weight: '600' },
-        callbacks: {
-          title: function(items) { return items[0].label; },
-          label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y); }
-        }
-      }},
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
       scales: {
         x: {
-          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Sora', size: 10 }, maxRotation: 45 },
-          grid: { color: 'rgba(30,37,46,0.5)' },
-          border: { color: '#1e252e' }
+          grid: { color: 'hsl(0,0%,10%)' },
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 10 }, maxRotation: 45 }
         },
         y: {
-          ticks: { color: '#8e8e8e', font: { family: 'Sora', size: 10 }, callback: v => formatCurrency(v) },
-          grid: { color: 'rgba(30,37,46,0.5)' },
-          border: { color: '#1e252e' }
+          grid: { color: 'hsl(0,0%,10%)' },
+          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 10 }, callback: v => formatCurrency(v) }
         }
       }
     }
@@ -903,58 +1003,49 @@ function renderCumulativeChart() {
 }
 
 // ============================================================
-// DAILY PNL CHART
+// RENDER DAILY CHART
 // ============================================================
 function renderDailyChart() {
   const keys = Object.keys(dailyData).sort();
   if (keys.length === 0) return;
 
-  const labels = keys.map(k => { const p = k.split('-'); return p[2] + '/' + p[1].replace(/^0/,'') + '/' + p[0].slice(-2); });
-  const positives = keys.map(k => dailyData[k].pnl > 0 ? dailyData[k].pnl : null);
-  const negatives = keys.map(k => dailyData[k].pnl < 0 ? dailyData[k].pnl : null);
+  const labels = [];
+  const values = [];
+  const colors = [];
+
+  keys.forEach(key => {
+    const day = dailyData[key];
+    const date = new Date(key);
+    const label = `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getFullYear()).slice(2)}`;
+    labels.push(label);
+    values.push(day.pnl);
+    colors.push(day.pnl >= 0 ? '#00c9a7' : '#ff4757');
+  });
 
   const ctx = document.getElementById('dailyChart').getContext('2d');
-  if (dailyChart) dailyChart.destroy();
-
   dailyChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,
-      datasets: [
-        { data: positives, backgroundColor: '#00c9a7', borderRadius: 2 },
-        { data: negatives, backgroundColor: '#ff4757', borderRadius: 2 }
-      ]
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 4,
+        borderSkipped: false
+      }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1a2230',
-          titleColor: '#6b7a8d',
-          bodyColor: '#eef0f2',
-          borderColor: '#1e252e',
-          borderWidth: 1,
-          titleFont: { family: 'Sora', size: 11 },
-          bodyFont: { family: 'Sora', size: 13, weight: '600' },
-          callbacks: {
-            title: function(items) { return items[0].label; },
-            label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y || 0); }
-          },
-          filter: function(item) { return item.parsed.y !== null; }
-        }
-      },
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
       scales: {
         x: {
-          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Sora', size: 10 }, maxRotation: 45 },
           grid: { display: false },
-          border: { color: '#1e252e' }
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 10 }, maxRotation: 45 }
         },
         y: {
-          ticks: { color: '#8e8e8e', font: { family: 'Sora', size: 10 }, callback: v => formatCurrency(v) },
-          grid: { color: 'rgba(30,37,46,0.5)' },
-          border: { color: '#1e252e' }
+          grid: { color: 'hsl(0,0%,10%)' },
+          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 10 }, callback: v => formatCurrency(v) }
         }
       }
     }
@@ -962,119 +1053,155 @@ function renderDailyChart() {
 }
 
 // ============================================================
-// CALENDAR
+// RENDER CALENDAR
 // ============================================================
 function renderCalendar() {
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('cal-month-title').textContent = monthNames[calendarMonth] + ' ' + calendarYear;
+  document.getElementById('calendarMonth').textContent = `${monthNames[calendarMonth]} ${calendarYear}`;
+
+  const firstDay = new Date(calendarYear, calendarMonth, 1);
+  const lastDay = new Date(calendarYear, calendarMonth + 1, 0);
+  const daysInMonth = lastDay.getDate();
+  
+  let startDay = firstDay.getDay();
+  startDay = startDay === 0 ? 6 : startDay - 1;
 
   const grid = document.getElementById('calendarGrid');
-  const sidebar = document.getElementById('weeklySidebar');
   grid.innerHTML = '';
-  sidebar.innerHTML = '';
 
-  // Day headers (Mon-Sun)
-  const dayHeaders = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  dayHeaders.forEach(d => {
-    const h = document.createElement('div');
-    h.className = 'cal-header';
-    h.textContent = d;
-    grid.appendChild(h);
-  });
-
-  // First day of month (0=Sun, convert to Mon-based)
-  const firstDay = new Date(calendarYear, calendarMonth, 1);
-  let startDow = firstDay.getDay(); // 0=Sun
-  startDow = startDow === 0 ? 6 : startDow - 1; // Convert to Mon=0
-
-  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-  const today = new Date();
-
-  // Monthly PnL
-  let monthlyPnl = 0;
-  let tradingDays = 0;
-  for (let d = 1; d <= daysInMonth; d++) {
-    const key = `${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    if (dailyData[key]) {
-      monthlyPnl += dailyData[key].pnl;
-      tradingDays++;
-    }
-  }
-  const mpnlEl = document.getElementById('cal-monthly-pnl');
-  mpnlEl.textContent = formatCurrency(monthlyPnl);
-  mpnlEl.className = 'ms-pnl ' + (monthlyPnl >= 0 ? 'positive' : 'negative');
-  document.getElementById('cal-trading-days').textContent = tradingDays + ' days';
-
-  // Empty cells before first day
-  for (let i = 0; i < startDow; i++) {
+  for (let i = 0; i < startDay; i++) {
     const empty = document.createElement('div');
-    empty.className = 'cal-day empty';
+    empty.className = 'calendar-day';
+    empty.style.background = 'transparent';
+    empty.style.border = 'none';
     grid.appendChild(empty);
   }
 
-  // Track weeks for sidebar
-  const weeks = [];
-  let currentWeek = { pnl: 0, tradingDays: 0 };
-  let dayOfWeek = startDow;
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
-  for (let d = 1; d <= daysInMonth; d++) {
-    const key = `${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const data = dailyData[key];
-    const isToday = (d === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear());
+  let monthPnl = 0;
+  let tradingDays = 0;
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = `${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayData = dailyData[dateKey];
 
     const cell = document.createElement('div');
-    cell.className = 'cal-day';
-    if (isToday) cell.classList.add('today');
+    cell.className = 'calendar-day';
+    
+    if (dateKey === todayKey) {
+      cell.classList.add('today');
+    }
 
-    if (data) {
-      cell.classList.add(data.pnl >= 0 ? 'positive' : 'negative');
-      currentWeek.pnl += data.pnl;
-      currentWeek.tradingDays++;
-
-      cell.innerHTML = `
-        <div class="day-num">${d}</div>
-        <div class="day-pnl ${data.pnl >= 0 ? 'positive' : 'negative'}">${formatCurrency(data.pnl)}</div>
-        <div class="day-meta">${data.tradeCount} trade${data.tradeCount > 1 ? 's' : ''}<br>${data.tradeCount > 0 ? Math.round((data.wins/data.tradeCount)*100) : 0}%</div>
-      `;
+    if (dayData) {
+      monthPnl += dayData.pnl;
+      tradingDays++;
+      cell.classList.add(dayData.pnl >= 0 ? 'positive' : 'negative');
+      
+      const pnlDiv = document.createElement('div');
+      pnlDiv.className = 'calendar-day-pnl ' + (dayData.pnl >= 0 ? 'positive' : 'negative');
+      pnlDiv.textContent = formatCurrency(dayData.pnl);
+      
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'calendar-day-meta';
+      metaDiv.textContent = `${dayData.tradeCount} trade${dayData.tradeCount !== 1 ? 's' : ''}`;
+      const winPct = dayData.tradeCount > 0 ? (dayData.wins / dayData.tradeCount * 100) : 0;
+      if (dayData.tradeCount > 0) {
+        metaDiv.textContent += `\n${Math.round(winPct)}%`;
+      }
+      
+      cell.innerHTML = `<div class="calendar-day-num">${day}</div>`;
+      cell.appendChild(pnlDiv);
+      cell.appendChild(metaDiv);
     } else {
-      cell.innerHTML = `<div class="day-num">${d}</div>`;
+      cell.innerHTML = `<div class="calendar-day-num">${day}</div>`;
     }
 
     grid.appendChild(cell);
-
-    // End of week (Sunday = dayOfWeek 6)
-    if (dayOfWeek === 6 || d === daysInMonth) {
-      weeks.push({...currentWeek});
-      currentWeek = { pnl: 0, tradingDays: 0 };
-    }
-    dayOfWeek = (dayOfWeek + 1) % 7;
   }
 
-  // Render weekly sidebar
-  weeks.forEach((week, i) => {
-    const item = document.createElement('div');
-    item.className = 'week-item';
-    item.innerHTML = `
-      <div class="week-label">Week ${i+1}</div>
-      <div class="week-pnl ${week.pnl >= 0 ? 'positive' : 'negative'}">${formatCurrency(week.pnl)}</div>
-      <div class="week-days">${week.tradingDays} days</div>
-    `;
-    sidebar.appendChild(item);
+  document.getElementById('monthlyPnl').textContent = formatCurrency(monthPnl);
+  document.getElementById('monthlyPnl').className = 'calendar-stats-pnl ' + (monthPnl >= 0 ? 'positive' : 'negative');
+  document.getElementById('monthlyDays').textContent = `${tradingDays} day${tradingDays !== 1 ? 's' : ''}`;
+
+  renderWeeklySidebar(calendarYear, calendarMonth, daysInMonth, startDay);
+}
+
+function renderWeeklySidebar(year, month, daysInMonth, startDay) {
+  const sidebar = document.getElementById('weeklySidebar');
+  sidebar.innerHTML = '';
+
+  const weeks = [];
+  let currentWeek = { start: 1, end: 0, pnl: 0, days: 0 };
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayOfWeek = (startDay + day - 1) % 7;
+    
+    if (currentWeek.end === 0) {
+      currentWeek.start = day;
+    }
+    currentWeek.end = day;
+
+    const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayData = dailyData[dateKey];
+    if (dayData) {
+      currentWeek.pnl += dayData.pnl;
+      currentWeek.days++;
+    }
+
+    if (dayOfWeek === 6 || day === daysInMonth) {
+      weeks.push({ ...currentWeek });
+      currentWeek = { start: day + 1, end: 0, pnl: 0, days: 0 };
+    }
+  }
+
+  weeks.forEach((week, idx) => {
+    const weekDiv = document.createElement('div');
+    weekDiv.className = 'week-item';
+    
+    const label = document.createElement('div');
+    label.className = 'week-label';
+    label.textContent = `Week ${idx + 1}`;
+    
+    const pnl = document.createElement('div');
+    pnl.className = 'week-pnl ' + (week.pnl >= 0 ? 'positive' : 'negative');
+    pnl.textContent = formatCurrency(week.pnl);
+    
+    const days = document.createElement('div');
+    days.className = 'week-days';
+    days.textContent = `${week.days} day${week.days !== 1 ? 's' : ''}`;
+    
+    weekDiv.appendChild(label);
+    weekDiv.appendChild(pnl);
+    weekDiv.appendChild(days);
+    sidebar.appendChild(weekDiv);
   });
 }
 
-function changeMonth(dir) {
-  calendarMonth += dir;
-  if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
-  if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+function changeMonth(delta) {
+  calendarMonth += delta;
+  if (calendarMonth < 0) {
+    calendarMonth = 11;
+    calendarYear--;
+  } else if (calendarMonth > 11) {
+    calendarMonth = 0;
+    calendarYear++;
+  }
   renderCalendar();
 }
 
-function goToThisMonth() {
-  calendarMonth = new Date().getMonth();
-  calendarYear = new Date().getFullYear();
+function goToCurrentMonth() {
+  const now = new Date();
+  calendarMonth = now.getMonth();
+  calendarYear = now.getFullYear();
   renderCalendar();
 }
+
+// ============================================================
+// INIT
+// ============================================================
+loadData();
 </script>
 </body>
 </html>
