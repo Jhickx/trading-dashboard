@@ -54,6 +54,20 @@
     --accent: var(--color-accent);
   }
 
+  body.light-mode {
+    --color-bg-dark: hsl(0, 0%, 90%);
+    --color-bg: hsl(0, 0%, 95%);
+    --color-bg-light: hsl(0, 0%, 100%);
+    --color-border: hsl(0, 0%, 85%);
+    --color-border-light: hsl(0, 0%, 90%);
+    --color-text: hsl(0, 0%, 5%);
+    --color-text-light: hsl(0, 0%, 25%);
+    --color-text-muted: hsl(0, 0%, 45%);
+    --gradient-card: linear-gradient(0deg, var(--color-bg), var(--color-bg-light));
+    --gradient-card-hover: linear-gradient(0deg, var(--color-bg), var(--color-bg-light) 50%);
+    --shadow: 0px 2px 2px #00000030, 0px 4px 4px #00000015;
+  }
+
   * { margin:0; padding:0; box-sizing:border-box; }
 
   body {
@@ -61,6 +75,7 @@
     background: var(--color-bg-dark);
     color: var(--color-text);
     min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
     padding: var(--spacing-md) 0;
     margin: 0 auto;
     width: 95%;
@@ -407,6 +422,11 @@
     <span style="color:var(--text-secondary);">to</span>
     <input type="date" id="dateTo" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Manrope;font-size:12px;" />
     <button onclick="applyDateFilter()" style="background:var(--accent);color:#0a0c0f;border:none;padding:8px 16px;border-radius:8px;font-family:Manrope;font-weight:600;font-size:12px;cursor:pointer;">Apply</button>
+    <button class="magic-btn" onclick="toggleTheme()" style="background:var(--color-text);color:var(--color-bg);border:none;padding:8px;border-radius:8px;font-family:Manrope;font-weight:600;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>
+      </svg>
+    </button>
   </div>
 </div>
 
@@ -1058,6 +1078,41 @@ function goToThisMonth() {
   calendarMonth = new Date().getMonth();
   calendarYear = new Date().getFullYear();
   renderCalendar();
+}
+
+// ============================================================
+// THEME TOGGLE
+// ============================================================
+function toggleTheme() {
+  document.body.classList.toggle('light-mode');
+  
+  // Update chart colors
+  if (cumulativeChart) {
+    const isLight = document.body.classList.contains('light-mode');
+    const styles = getComputedStyle(document.body);
+    const borderColor = styles.getPropertyValue('--color-border').trim();
+    const textMuted = styles.getPropertyValue('--color-text-muted').trim();
+    
+    // Update cumulative chart
+    cumulativeChart.options.scales.x.grid.color = borderColor;
+    cumulativeChart.options.scales.x.ticks.color = textMuted;
+    cumulativeChart.options.scales.y.grid.color = borderColor;
+    cumulativeChart.options.scales.y.ticks.color = textMuted;
+    cumulativeChart.update();
+  }
+  
+  if (dailyChart) {
+    const isLight = document.body.classList.contains('light-mode');
+    const styles = getComputedStyle(document.body);
+    const borderColor = styles.getPropertyValue('--color-border').trim();
+    const textMuted = styles.getPropertyValue('--color-text-muted').trim();
+    
+    // Update daily chart
+    dailyChart.options.scales.x.ticks.color = textMuted;
+    dailyChart.options.scales.y.grid.color = borderColor;
+    dailyChart.options.scales.y.ticks.color = textMuted;
+    dailyChart.update();
+  }
 }
 
 // Initialize - load data after all functions are defined
