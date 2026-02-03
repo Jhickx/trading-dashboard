@@ -100,7 +100,7 @@
     color: var(--text-primary);
     padding: 8px 14px;
     border-radius: 8px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--ff);
     font-size: 12px;
     outline: none;
   }
@@ -111,7 +111,7 @@
     border: none;
     padding: 8px 18px;
     border-radius: 8px;
-    font-family: 'Sora', sans-serif;
+    font-family: var(--ff);
     font-weight: 600;
     font-size: 13px;
     cursor: pointer;
@@ -268,7 +268,7 @@
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
-    font-family: 'Sora', sans-serif;
+    font-family: var(--ff);
   }
   .this-month-btn:hover { background: var(--bg-card-hover); }
   .monthly-stats {
@@ -423,7 +423,7 @@
   </div>
   <div class="metric-card" id="card-winrate" style="position:relative;">
     <div style="position:absolute; top:50%; right:var(--card-padding); transform:translateY(-50%); display:flex; flex-direction:column; align-items:center;">
-      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:70px; height:44px;">
+      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:90px; height:56px;">
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round"/>
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" id="gauge-arc-loss" stroke-dasharray="94.25" stroke-dashoffset="0"/>
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" id="gauge-arc" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
@@ -450,7 +450,7 @@
   <div class="metric-card" id="card-avg">
     <div class="label">Avg win / loss trade</div>
     <div style="display:flex; align-items:center; gap:16px; margin-top:4px;">
-      <div class="value" id="val-ratio" style="font-size:20px; white-space:nowrap;">—</div>
+      <div class="value" id="val-ratio" style="font-size:26px; white-space:nowrap;">—</div>
       <div style="flex:1; min-width:100px;">
         <div class="avg-bar" id="avg-bar"><div class="win-part"></div><div class="loss-part"></div></div>
         <div class="avg-bar-labels">
