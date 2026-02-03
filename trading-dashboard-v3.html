@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trading Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  /* ============================================================
+     CSS VARIABLES - CodePen-inspired Design System
+     ============================================================ */
+  :root {
+    /* Colors - HSL based like CodePen */
+    --color-bg-dark: hsl(0, 0%, 0%);
+    --color-bg: hsl(0, 0%, 5%);
+    --color-bg-light: hsl(0, 0%, 10%);
+    --color-border: hsl(0, 0%, 10%);
+    --color-border-light: hsl(0, 0%, 20%);
+    --color-text: hsl(0, 0%, 95%);
+    --color-text-light: hsl(0, 0%, 75%);
+    --color-text-muted: hsl(0, 0%, 55%);
+    --color-green: #00c9a7;
+    --color-red: #ff4757;
+    --color-accent: #00c9a7;
+    
+    /* Gradients */
+    --gradient-card: linear-gradient(0deg, var(--color-bg) 95%, var(--color-bg-light));
+    --gradient-card-hover: linear-gradient(0deg, var(--color-bg), var(--color-bg-light));
+    
+    /* Typography */
+    --ff: "Manrope", sans-serif;
+    
+    /* Spacing - Consistent */
+    --rounded: 0.75rem;
+    --card-padding: 1.5rem;
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    
+    /* Shadows */
+    --shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+    
+    /* Legacy aliases for compatibility */
+    --bg-deep: var(--color-bg-dark);
+    --bg-card: var(--color-bg);
+    --border: var(--color-border);
+    --green: var(--color-green);
+    --red: var(--color-red);
+    --text-primary: var(--color-text);
+    --text-secondary: var(--color-text-light);
+    --text-muted: var(--color-text-muted);
+    --accent: var(--color-accent);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: var(--ff);
+    background: var(--color-bg-dark);
+    color: var(--color-text);
+    min-height: 100vh;
+    padding: var(--spacing-md) 0;
+    margin: 0 auto;
+    width: 95%;
+    max-width: 1400px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-sm) 0;
+  }
+  .header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .header .subtitle {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  /* Config input for CSV URL */
+  .config-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .config-bar input {
+    flex:1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    outline: none;
+  }
+  .config-bar input:focus { border-color: var(--accent); }
+  .config-bar button {
+    background: var(--accent);
+    color: #0a0c0f;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .config-bar button:hover { opacity: 0.85; }
+
+  /* Metric Cards */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow);
+    border-radius: var(--rounded);
+    padding: var(--card-padding);
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s ease;
+  }
+  .metric-card:hover {
+    background: var(--gradient-card-hover);
+  }
+  .metric-card .label {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+  }
+  .metric-card .value {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -1px;
+  }
+  .metric-card .value.positive { color: var(--green); }
+  .metric-card .value.negative { color: var(--red); }
+
+  /* Gauge styles */
+  .gauge-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 4px;
+  }
+  .gauge-svg { width: 64px; height: 64px; }
+  .gauge-stats { display: flex; gap: 12px; }
+  .gauge-stat { font-size: 11px; }
+  .gauge-stat .gs-val { font-weight: 600; font-size: 13px; }
+  .gauge-stat.win .gs-val { color: var(--green); }
+  .gauge-stat.loss .gs-val { color: var(--red); }
+  .gauge-stat.neutral .gs-val { color: var(--text-secondary); }
+
+  /* Avg win/loss bar */
+  .avg-bar {
+    display: flex;
+    margin-top: 10px;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    gap: 3px;
+  }
+  .avg-bar .win-part { background: var(--green); flex: 1; border-radius: 3px; }
+  .avg-bar .loss-part { background: var(--red); flex: 1; border-radius: 3px; }
+  .avg-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+  .avg-bar-labels span { font-size: 11px; font-weight: 500; }
+  .avg-bar-labels .win-label { color: var(--green); }
+  .avg-bar-labels .loss-label { color: var(--red); }
+
+  /* Charts Row */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .chart-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow);
+    border-radius: var(--rounded);
+    padding: var(--card-padding);
+    transition: background 0.2s ease;
+  }
+  .chart-card:hover {
+    background: var(--gradient-card-hover);
+  }
+  .chart-card .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+  }
+  .chart-card .chart-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chart-card canvas { width: 100% !important; }
+
+  /* Calendar */
+  .calendar-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .calendar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .calendar-nav .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .calendar-nav .month-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .nav-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-btn:hover { background: var(--bg-card-hover); }
+  .this-month-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+  }
+  .this-month-btn:hover { background: var(--bg-card-hover); }
+  .monthly-stats {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .monthly-stats .ms-pnl { font-weight: 600; font-size: 14px; }
+  .monthly-stats .ms-pnl.positive { color: var(--green); }
+  .monthly-stats .ms-pnl.negative { color: var(--red); }
+  .monthly-stats .ms-days { color: var(--text-muted); font-size: 12px; }
+
+  .calendar-grid-wrapper {
+    display: flex;
+    gap: 16px;
+  }
+  .calendar-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .cal-header {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .cal-day {
+    background: var(--color-bg-light);
+    border-radius: var(--rounded);
+    padding: var(--spacing-xs);
+    height: 90px;
+    position: relative;
+    border: 1px solid transparent;
+    overflow: hidden;
+  }
+  .cal-day.positive { background: rgba(0,201,167,0.08); border-color: rgba(0,201,167,0.2); }
+  .cal-day.negative { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.2); }
+  .cal-day.today { border-color: var(--accent); }
+  .cal-day .day-num {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    text-align: right;
+  }
+  .cal-day.today { background: transparent; }
+  .cal-day.today .day-num { 
+    color: var(--text-muted);
+    font-weight: 400;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border: 1.5px solid #e64848;
+    border-radius: 50%;
+  }
+  .cal-day .day-pnl {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .cal-day .day-pnl.positive { color: var(--green); }
+  .cal-day .day-pnl.negative { color: var(--red); }
+  .cal-day .day-meta {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  /* Weekly sidebar */
+  .weekly-sidebar {
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 27px;
+  }
+  .week-item {
+    background: var(--color-bg-light);
+    border-radius: var(--rounded);
+    padding: var(--spacing-xs);
+    height: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+  }
+  .week-item .week-label {
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    margin-bottom: 3px;
+  }
+  .week-item .week-pnl {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .week-item .week-pnl.positive { color: var(--green); }
+  .week-item .week-pnl.negative { color: var(--red); }
+  .week-item .week-days {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Loading */
+  .loading {
+    color: var(--text-secondary);
+    font-size: 13px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  /* Empty state for calendar days */
+  .cal-day.empty { opacity: 0.3; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Trading Dashboard</h1>
+  </div>
+  <div style="display:flex; gap:12px; align-items:center;">
+    <input type="date" id="dateFrom" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Sora;font-size:12px;" />
+    <span style="color:var(--text-secondary);">to</span>
+    <input type="date" id="dateTo" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Sora;font-size:12px;" />
+    <button onclick="applyDateFilter()" style="background:var(--accent);color:#0a0c0f;border:none;padding:8px 16px;border-radius:8px;font-family:Sora;font-weight:600;font-size:12px;cursor:pointer;">Apply</button>
+  </div>
+</div>
+
+<div class="config-bar">
+  <span style="color:var(--text-muted);font-size:12px;">Loading trade data...</span>
+  <span id="loadStatus" style="color:var(--green);font-size:12px;display:none;">✓ Data loaded</span>
+</div>
+
+<!-- Metric Cards -->
+<div class="metrics-row">
+  <div class="metric-card" id="card-pnl">
+    <div class="label">Net P&L </div>
+    <div class="value" id="val-pnl">—</div>
+  </div>
+  <div class="metric-card" id="card-winrate" style="position:relative;">
+    <div style="position:absolute; top:var(--card-padding); right:var(--card-padding); display:flex; flex-direction:column; align-items:center;">
+      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:80px; height:50px;">
+        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" id="gauge-arc-loss" stroke-dasharray="94.25" stroke-dashoffset="0"/>
+        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" id="gauge-arc" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
+      </svg>
+      <div class="gauge-stats" style="margin-top:8px;">
+        <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div><div>Wins</div></div>
+        <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div><div>B/E</div></div>
+        <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div><div>Losses</div></div>
+      </div>
+    </div>
+    <div class="label">Trade win %</div>
+    <div class="value" id="val-winrate" style="margin-top:4px;">—</div>
+  </div>
+  <div class="metric-card" id="card-pf" style="position:relative;">
+    <div style="position:absolute; top:var(--card-padding); right:var(--card-padding); display:flex; justify-content:center;">
+      <svg class="gauge-svg" viewBox="0 0 64 64" style="width:64px; height:64px;">
+        <circle cx="32" cy="32" r="26" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
+        <circle cx="32" cy="32" r="26" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="pf-gauge-circle" transform="rotate(-90 32 32)"/>
+      </svg>
+    </div>
+    <div class="label">Profit factor</div>
+    <div class="value" id="val-pf" style="margin-top:4px;">—</div>
+  </div>
+  <div class="metric-card" id="card-avg">
+    <div class="label">Avg win / loss trade </div>
+    <div style="display:flex; gap:24px; margin-top:4px;">
+      <div><div class="value positive" id="val-avgwin">—</div></div>
+      <div><div class="value negative" id="val-avgloss">—</div></div>
+    </div>
+    <div class="avg-bar" id="avg-bar"><div class="win-part"></div><div class="loss-part"></div></div>
+    <div class="avg-bar-labels">
+      <span class="win-label" id="label-avgwin">—</span>
+      <span class="loss-label" id="label-avgloss">—</span>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="charts-row">
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">Daily net cumulative P&L </div>
+    </div>
+    <canvas id="cumulativeChart" height="220"></canvas>
+  </div>
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title">Net daily P&L </div>
+    </div>
+    <canvas id="dailyChart" height="220"></canvas>
+  </div>
+</div>
+
+<!-- Calendar -->
+<div class="calendar-section">
+  <div class="calendar-nav">
+    <div class="nav-left">
+      <button class="nav-btn" onclick="changeMonth(-1)">&#8592;</button>
+      <span class="month-title" id="cal-month-title">January 2026</span>
+      <button class="nav-btn" onclick="changeMonth(1)">&#8594;</button>
+      <button class="this-month-btn" onclick="goToThisMonth()">This month</button>
+    </div>
+    <div class="monthly-stats">
+      <span class="ms-pnl positive" id="cal-monthly-pnl">$0</span>
+      <span class="ms-days" id="cal-trading-days">0 days</span>
+    </div>
+  </div>
+  <div class="calendar-grid-wrapper">
+    <div class="calendar-grid" id="calendarGrid"></div>
+    <div class="weekly-sidebar" id="weeklySidebar"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA STORE
+// ============================================================
+let allTrades = [];
+let allTradesUnfiltered = []; // Store original unfiltered data
+let dailyData = {}; // { "2026-01-21": { pnl, tradeCount, wins, losses } }
+let calendarMonth = new Date().getMonth();
+let calendarYear = new Date().getFullYear();
+let cumulativeChart = null;
+let dailyChart = null;
+let dateFilterFrom = null;
+let dateFilterTo = null;
+
+// ============================================================
+// DATE FILTER
+// ============================================================
+function applyDateFilter() {
+  const fromInput = document.getElementById('dateFrom').value;
+  const toInput = document.getElementById('dateTo').value;
+  
+  dateFilterFrom = fromInput ? new Date(fromInput + 'T00:00:00') : null;
+  dateFilterTo = toInput ? new Date(toInput + 'T23:59:59') : null;
+  
+  // Filter allTrades
+  if (dateFilterFrom || dateFilterTo) {
+    allTrades = allTradesUnfiltered.filter(t => {
+      if (dateFilterFrom && t.date < dateFilterFrom) return false;
+      if (dateFilterTo && t.date > dateFilterTo) return false;
+      return true;
+    });
+  } else {
+    allTrades = [...allTradesUnfiltered];
+  }
+  
+  // Rebuild dailyData from filtered trades
+  dailyData = {};
+  allTrades.forEach(t => {
+    if (!dailyData[t.dateKey]) {
+      dailyData[t.dateKey] = { pnl: 0, tradeCount: 0, wins: 0, losses: 0, breakeven: 0 };
+    }
+    dailyData[t.dateKey].pnl += t.pnl;
+    dailyData[t.dateKey].tradeCount += 1;
+    if (t.pnl > 0) dailyData[t.dateKey].wins += 1;
+    else if (t.pnl < 0) dailyData[t.dateKey].losses += 1;
+    else dailyData[t.dateKey].breakeven += 1;
+  });
+  
+  renderAll();
+}
+
+// ============================================================
+// LOAD & PARSE CSV
+// ============================================================
+const GVIZ_URL = 'https://docs.google.com/spreadsheets/d/1lr6NH8wkv0lZvuriRLG2nCSlg-VGH6D6JA5sxDE7Bus/gviz/tq?tqx=out:csv&gid=653744386';
+const PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_owNsVgezKK00Z8HGehudo_5gqajVxvCqMCeCCwSwkDhx9484DVHY3z9hWMds2ime/pub?gid=653744386&single=true&output=csv';
+
+async function loadData() {
+  const statusEl = document.querySelector('.config-bar span:first-child');
+  const successEl = document.getElementById('loadStatus');
+
+  console.log('Starting data load...');
+  console.log('Status elements:', statusEl, successEl);
+
+  const urls = [PUB_URL, GVIZ_URL];
+
+  for (const url of urls) {
+    console.log('Trying URL:', url);
+    try {
+      const res = await fetch(url);
+      console.log('Fetch response:', res.status, res.ok);
+      if (!res.ok) continue;
+      const text = await res.text();
+      console.log('Text length:', text.length);
+      console.log('First 200 chars:', text.substring(0, 200));
+      if (text.length < 100) continue;
+      // Destroy existing charts before re-rendering
+      if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
+      if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
+      console.log('Parsing CSV...');
+      parseCSV(text);
+      console.log('Parsed trades:', allTrades.length);
+      console.log('Rendering...');
+      renderAll();
+      console.log('Done!');
+      statusEl.style.display = 'none';
+      successEl.style.display = 'inline';
+      return; // Stop after first success
+    } catch(e) {
+      console.error('Error loading from', url, ':', e);
+      continue;
+    }
+  }
+
+  console.error('Failed to load from all URLs');
+  statusEl.textContent = '⚠ Failed to load data';
+  statusEl.style.color = 'var(--red)';
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = parseCSVLine(lines[0]);
+  allTrades = [];
+  allTradesUnfiltered = [];
+  dailyData = {};
+
+  // Find column indices
+  // Expecting: Trade ID, Account, Open date, Open Time, Ticker, Direction, Win/Loss, % Risk, % PnL, R, PnL, Learnings
+  const dateIdx = headers.findIndex(h => h.toLowerCase().includes('open date') || h.toLowerCase().includes('date'));
+  const pnlIdx = headers.findIndex(h => h.toLowerCase() === 'pnl');
+  const winlossIdx = headers.findIndex(h => h.toLowerCase().includes('win/loss'));
+  const tickerIdx = headers.findIndex(h => h.toLowerCase().includes('ticker'));
+  const directionIdx = headers.findIndex(h => h.toLowerCase().includes('direction'));
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    const dateStr = cols[dateIdx];
+    const pnlStr = cols[pnlIdx];
+
+    if (!dateStr || !pnlStr) continue;
+
+    // Parse PnL: remove $, spaces, handle negative, handle European decimals
+    let pnlClean = pnlStr.replace(/[$\s]/g,'').replace(/'/g,'');
+    // Detect if using European number format (period as thousands, comma as decimal)
+    // e.g. "1.471,95" or "-1.471,95"
+    if (pnlClean.includes(',') && pnlClean.includes('.')) {
+      // European: remove dots (thousands separator), replace comma with dot
+      pnlClean = pnlClean.replace(/\./g,'').replace(',','.');
+    } else if (pnlClean.includes(',')) {
+      // Could be European decimal: "195,09"
+      pnlClean = pnlClean.replace(',','.');
+    }
+    const pnl = parseFloat(pnlClean);
+    if (isNaN(pnl)) continue;
+
+    // Parse date: "21 jan 26" or similar
+    const date = parseDate(dateStr);
+    if (!date) continue;
+
+    const dateKey = formatDateKey(date);
+    const winLoss = cols[winlossIdx] ? cols[winlossIdx].toLowerCase() : '';
+    const ticker = cols[tickerIdx] || '';
+    const direction = cols[directionIdx] || '';
+
+    const trade = { date, dateKey, pnl, winLoss, ticker, direction };
+    allTrades.push(trade);
+    allTradesUnfiltered.push(trade);
+
+    if (!dailyData[dateKey]) {
+      dailyData[dateKey] = { pnl: 0, tradeCount: 0, wins: 0, losses: 0, breakeven: 0 };
+    }
+    dailyData[dateKey].pnl += pnl;
+    dailyData[dateKey].tradeCount += 1;
+    if (pnl > 0) dailyData[dateKey].wins += 1;
+    else if (pnl < 0) dailyData[dateKey].losses += 1;
+    else dailyData[dateKey].breakeven += 1;
+  }
+}
+
+function parseDate(str) {
+  // Handle "21 jan 26", "21 jan 2026", etc.
+  const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  const parts = str.trim().split(/[\s\/\-]+/);
+  if (parts.length >= 3) {
+    let day, month, year;
+    // Try "21 jan 26"
+    if (isNaN(parts[1]) && months[parts[1].toLowerCase()] !== undefined) {
+      day = parseInt(parts[0]);
+      month = months[parts[1].toLowerCase()];
+      year = parseInt(parts[2]);
+      if (year < 100) year += 2000;
+    }
+    // Try "jan 21 26" or other formats
+    else if (isNaN(parts[0]) && months[parts[0].toLowerCase()] !== undefined) {
+      month = months[parts[0].toLowerCase()];
+      day = parseInt(parts[1]);
+      year = parseInt(parts[2]);
+      if (year < 100) year += 2000;
+    }
+    if (day && month !== undefined && year) {
+      return new Date(year, month, day);
+    }
+  }
+  // Fallback: try native parse
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) return d;
+  return null;
+}
+
+function formatDateKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function formatCurrency(val) {
+  const abs = Math.abs(val);
+  let str;
+  if (abs >= 1000) str = '$' + (abs/1000).toFixed(1) + 'K';
+  else str = '$' + abs.toFixed(2);
+  return (val < 0 ? '-' : '') + str;
+}
+
+function formatCurrencyFull(val) {
+  const sign = val < 0 ? '-' : '';
+  const abs = Math.abs(val);
+  return sign + '$' + abs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll() {
+  renderMetrics();
+  renderCumulativeChart();
+  renderDailyChart();
+  renderCalendar();
+}
+
+// ============================================================
+// METRICS
+// ============================================================
+function renderMetrics() {
+  // Net PnL
+  const totalPnl = allTrades.reduce((s,t) => s + t.pnl, 0);
+  const pnlEl = document.getElementById('val-pnl');
+  pnlEl.textContent = formatCurrencyFull(totalPnl);
+  pnlEl.className = 'value ' + (totalPnl >= 0 ? 'positive' : 'negative');
+
+  // Win rate
+  const wins = allTrades.filter(t => t.pnl > 0).length;
+  const losses = allTrades.filter(t => t.pnl < 0).length;
+  const breakeven = allTrades.filter(t => t.pnl === 0).length;
+  const total = allTrades.length;
+  const winRate = total > 0 ? (wins / total) * 100 : 0;
+
+  document.getElementById('val-winrate').textContent = winRate.toFixed(2) + '%';
+  document.getElementById('val-wins').textContent = wins;
+  document.getElementById('val-losses').textContent = losses;
+  document.getElementById('val-breakeven').textContent = breakeven;
+
+  // Gauge - semicircle showing wins in green and losses in red
+  const gaugeArc = document.getElementById('gauge-arc');
+  const gaugeArcLoss = document.getElementById('gauge-arc-loss');
+  const arcLength = 94.25; // Half circle arc length
+  const lossRate = total > 0 ? (losses / total) * 100 : 0;
+  
+  // Green arc shows wins starting from left
+  const winOffset = arcLength * (1 - winRate / 100);
+  gaugeArc.style.strokeDashoffset = winOffset;
+  
+  // Red arc shows losses - needs to be offset to start after wins
+  const lossLength = arcLength * (lossRate / 100);
+  gaugeArcLoss.style.strokeDasharray = `${lossLength} ${arcLength}`;
+  gaugeArcLoss.style.strokeDashoffset = -arcLength * (winRate / 100);
+
+  // Profit Factor
+  const grossProfit = allTrades.filter(t=>t.pnl>0).reduce((s,t)=>s+t.pnl,0);
+  const grossLoss = Math.abs(allTrades.filter(t=>t.pnl<0).reduce((s,t)=>s+t.pnl,0));
+  const pf = grossLoss > 0 ? grossProfit / grossLoss : (grossProfit > 0 ? Infinity : 0);
+  const pfEl = document.getElementById('val-pf');
+  pfEl.textContent = pf === Infinity ? '∞' : pf.toFixed(2);
+  pfEl.className = 'value ' + (pf >= 1 ? 'positive' : 'negative');
+
+  // PF gauge (cap at 3 for visual)
+  const pfGauge = document.getElementById('pf-gauge-circle');
+  const pfCircumference = 163.36; // Full circle circumference for radius 26
+  const pfPercent = Math.min(pf / 3, 1);
+  pfGauge.style.strokeDashoffset = pfCircumference * (1 - pfPercent);
+  pfGauge.style.stroke = pf >= 1 ? 'var(--green)' : 'var(--red)';
+
+  // Avg win / loss
+  const avgWin = wins > 0 ? grossProfit / wins : 0;
+  const avgLoss = losses > 0 ? grossLoss / losses : 0;
+  document.getElementById('val-avgwin').textContent = formatCurrency(avgWin);
+  document.getElementById('val-avgloss').textContent = '-' + formatCurrency(avgLoss);
+  document.getElementById('label-avgwin').textContent = formatCurrency(avgWin);
+  document.getElementById('label-avgloss').textContent = '-' + formatCurrency(avgLoss);
+
+  // Avg bar ratio
+  const winPart = document.querySelector('.avg-bar .win-part');
+  const lossPart = document.querySelector('.avg-bar .loss-part');
+  const total2 = avgWin + avgLoss;
+  if (total2 > 0) {
+    winPart.style.flex = (avgWin / total2);
+    lossPart.style.flex = (avgLoss / total2);
+  }
+}
+
+// ============================================================
+// CUMULATIVE CHART
+// ============================================================
+function renderCumulativeChart() {
+  // Build sorted daily timeline
+  const keys = Object.keys(dailyData).sort();
+  if (keys.length === 0) return;
+
+  const labels = [];
+  const values = [];
+  let cumulative = 0;
+
+  // Generate all dates from first trade to last trade
+  const start = new Date(keys[0]);
+  const end = new Date(keys[keys.length-1]);
+  const d = new Date(start);
+  while (d <= end) {
+    const key = formatDateKey(d);
+    if (dailyData[key]) cumulative += dailyData[key].pnl;
+    labels.push(d.getDate() + '/' + (d.getMonth()+1) + '/' + String(d.getFullYear()).slice(-2));
+    values.push(cumulative);
+    d.setDate(d.getDate()+1);
+  }
+
+  const ctx = document.getElementById('cumulativeChart').getContext('2d');
+  if (cumulativeChart) cumulativeChart.destroy();
+
+  cumulativeChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        borderColor: '#3b82f6',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        backgroundColor: function(context) {
+          const chart = context.chart;
+          const {ctx: c, chartArea} = chart;
+          if (!chartArea) return 'transparent';
+          const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          gradient.addColorStop(0, 'rgba(59,130,246,0.3)');
+          gradient.addColorStop(1, 'rgba(59,130,246,0.0)');
+          return gradient;
+        },
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: '#1a2230',
+        titleColor: '#6b7a8d',
+        bodyColor: '#eef0f2',
+        borderColor: '#1e252e',
+        borderWidth: 1,
+        titleFont: { family: 'Sora', size: 11 },
+        bodyFont: { family: 'Sora', size: 13, weight: '600' },
+        callbacks: {
+          title: function(items) { return items[0].label; },
+          label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y); }
+        }
+      }},
+      scales: {
+        x: {
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Sora', size: 10 }, maxRotation: 45 },
+          grid: { color: 'rgba(30,37,46,0.5)' },
+          border: { color: '#1e252e' }
+        },
+        y: {
+          ticks: { color: '#8e8e8e', font: { family: 'Sora', size: 10 }, callback: v => formatCurrency(v) },
+          grid: { color: 'rgba(30,37,46,0.5)' },
+          border: { color: '#1e252e' }
+        }
+      }
+    }
+  });
+}
+
+// ============================================================
+// DAILY PNL CHART
+// ============================================================
+function renderDailyChart() {
+  const keys = Object.keys(dailyData).sort();
+  if (keys.length === 0) return;
+
+  const labels = keys.map(k => { const p = k.split('-'); return p[2] + '/' + p[1].replace(/^0/,'') + '/' + p[0].slice(-2); });
+  const positives = keys.map(k => dailyData[k].pnl > 0 ? dailyData[k].pnl : null);
+  const negatives = keys.map(k => dailyData[k].pnl < 0 ? dailyData[k].pnl : null);
+
+  const ctx = document.getElementById('dailyChart').getContext('2d');
+  if (dailyChart) dailyChart.destroy();
+
+  dailyChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        { data: positives, backgroundColor: '#00c9a7', borderRadius: 2 },
+        { data: negatives, backgroundColor: '#ff4757', borderRadius: 2 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a2230',
+          titleColor: '#6b7a8d',
+          bodyColor: '#eef0f2',
+          borderColor: '#1e252e',
+          borderWidth: 1,
+          titleFont: { family: 'Sora', size: 11 },
+          bodyFont: { family: 'Sora', size: 13, weight: '600' },
+          callbacks: {
+            title: function(items) { return items[0].label; },
+            label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y || 0); }
+          },
+          filter: function(item) { return item.parsed.y !== null; }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Sora', size: 10 }, maxRotation: 45 },
+          grid: { display: false },
+          border: { color: '#1e252e' }
+        },
+        y: {
+          ticks: { color: '#8e8e8e', font: { family: 'Sora', size: 10 }, callback: v => formatCurrency(v) },
+          grid: { color: 'rgba(30,37,46,0.5)' },
+          border: { color: '#1e252e' }
+        }
+      }
+    }
+  });
+}
+
+// ============================================================
+// CALENDAR
+// ============================================================
+function renderCalendar() {
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-title').textContent = monthNames[calendarMonth] + ' ' + calendarYear;
+
+  const grid = document.getElementById('calendarGrid');
+  const sidebar = document.getElementById('weeklySidebar');
+  grid.innerHTML = '';
+  sidebar.innerHTML = '';
+
+  // Day headers (Mon-Sun)
+  const dayHeaders = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  dayHeaders.forEach(d => {
+    const h = document.createElement('div');
+    h.className = 'cal-header';
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+
+  // First day of month (0=Sun, convert to Mon-based)
+  const firstDay = new Date(calendarYear, calendarMonth, 1);
+  let startDow = firstDay.getDay(); // 0=Sun
+  startDow = startDow === 0 ? 6 : startDow - 1; // Convert to Mon=0
+
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+  const today = new Date();
+
+  // Monthly PnL
+  let monthlyPnl = 0;
+  let tradingDays = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if (dailyData[key]) {
+      monthlyPnl += dailyData[key].pnl;
+      tradingDays++;
+    }
+  }
+  const mpnlEl = document.getElementById('cal-monthly-pnl');
+  mpnlEl.textContent = formatCurrency(monthlyPnl);
+  mpnlEl.className = 'ms-pnl ' + (monthlyPnl >= 0 ? 'positive' : 'negative');
+  document.getElementById('cal-trading-days').textContent = tradingDays + ' days';
+
+  // Empty cells before first day
+  for (let i = 0; i < startDow; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-day empty';
+    grid.appendChild(empty);
+  }
+
+  // Track weeks for sidebar
+  const weeks = [];
+  let currentWeek = { pnl: 0, tradingDays: 0 };
+  let dayOfWeek = startDow;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = `${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const data = dailyData[key];
+    const isToday = (d === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear());
+
+    const cell = document.createElement('div');
+    cell.className = 'cal-day';
+    if (isToday) cell.classList.add('today');
+
+    if (data) {
+      cell.classList.add(data.pnl >= 0 ? 'positive' : 'negative');
+      currentWeek.pnl += data.pnl;
+      currentWeek.tradingDays++;
+
+      cell.innerHTML = `
+        <div class="day-num">${d}</div>
+        <div class="day-pnl ${data.pnl >= 0 ? 'positive' : 'negative'}">${formatCurrency(data.pnl)}</div>
+        <div class="day-meta">${data.tradeCount} trade${data.tradeCount > 1 ? 's' : ''}<br>${data.tradeCount > 0 ? Math.round((data.wins/data.tradeCount)*100) : 0}%</div>
+      `;
+    } else {
+      cell.innerHTML = `<div class="day-num">${d}</div>`;
+    }
+
+    grid.appendChild(cell);
+
+    // End of week (Sunday = dayOfWeek 6)
+    if (dayOfWeek === 6 || d === daysInMonth) {
+      weeks.push({...currentWeek});
+      currentWeek = { pnl: 0, tradingDays: 0 };
+    }
+    dayOfWeek = (dayOfWeek + 1) % 7;
+  }
+
+  // Render weekly sidebar
+  weeks.forEach((week, i) => {
+    const item = document.createElement('div');
+    item.className = 'week-item';
+    item.innerHTML = `
+      <div class="week-label">Week ${i+1}</div>
+      <div class="week-pnl ${week.pnl >= 0 ? 'positive' : 'negative'}">${formatCurrency(week.pnl)}</div>
+      <div class="week-days">${week.tradingDays} days</div>
+    `;
+    sidebar.appendChild(item);
+  });
+}
+
+function changeMonth(dir) {
+  calendarMonth += dir;
+  if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+  if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+  renderCalendar();
+}
+
+function goToThisMonth() {
+  calendarMonth = new Date().getMonth();
+  calendarYear = new Date().getFullYear();
+  renderCalendar();
+}
+
+// Initialize - load data after all functions are defined
+loadData();
+</script>
+</body>
+</html>
