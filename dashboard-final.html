@@ -259,8 +259,9 @@
     margin-bottom: var(--spacing-sm);
   }
   .chart-card .chart-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
+    color: var(--color-text);
     color: var(--text-secondary);
     display: flex;
     align-items: center;
@@ -320,7 +321,7 @@
     align-items: center;
     gap: 14px;
   }
-  .monthly-stats .ms-pnl { font-weight: 600; font-size: 14px; }
+  .monthly-stats .ms-pnl { font-weight: 600; font-size: 16px; }
   .monthly-stats .ms-pnl.positive { color: var(--green); }
   .monthly-stats .ms-pnl.negative { color: var(--red); }
   .monthly-stats .ms-days { color: var(--text-muted); font-size: 12px; }
@@ -1006,6 +1007,13 @@ function renderCalendar() {
     h.textContent = d;
     grid.appendChild(h);
   });
+  
+  // Add spacer header to sidebar to align with calendar headers
+  const sidebarHeader = document.createElement('div');
+  sidebarHeader.className = 'cal-header';
+  sidebarHeader.style.padding = '8px 0';
+  sidebarHeader.style.visibility = 'hidden'; // invisible but takes up space
+  sidebar.appendChild(sidebarHeader);
 
   // First day of month (0=Sun, convert to Mon-based)
   const firstDay = new Date(calendarYear, calendarMonth, 1);
