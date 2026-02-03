@@ -403,10 +403,10 @@
     <h1>Trading Dashboard</h1>
   </div>
   <div style="display:flex; gap:12px; align-items:center;">
-    <input type="date" id="dateFrom" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Sora;font-size:12px;" />
+    <input type="date" id="dateFrom" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Manrope;font-size:12px;" />
     <span style="color:var(--text-secondary);">to</span>
-    <input type="date" id="dateTo" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Sora;font-size:12px;" />
-    <button onclick="applyDateFilter()" style="background:var(--accent);color:#0a0c0f;border:none;padding:8px 16px;border-radius:8px;font-family:Sora;font-weight:600;font-size:12px;cursor:pointer;">Apply</button>
+    <input type="date" id="dateTo" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Manrope;font-size:12px;" />
+    <button onclick="applyDateFilter()" style="background:var(--accent);color:#0a0c0f;border:none;padding:8px 16px;border-radius:8px;font-family:Manrope;font-weight:600;font-size:12px;cursor:pointer;">Apply</button>
   </div>
 </div>
 
@@ -863,8 +863,8 @@ function renderCumulativeChart() {
         bodyColor: '#eef0f2',
         borderColor: '#1e252e',
         borderWidth: 1,
-        titleFont: { family: 'Sora', size: 11 },
-        bodyFont: { family: 'Sora', size: 13, weight: '600' },
+        titleFont: { family: 'Manrope', size: 11 },
+        bodyFont: { family: 'Manrope', size: 13, weight: '600' },
         callbacks: {
           title: function(items) { return items[0].label; },
           label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y); }
