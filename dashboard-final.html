@@ -319,7 +319,6 @@
     margin-bottom: 4px;
     text-align: right;
   }
-  .cal-day.today { background: transparent; }
   .cal-day.today .day-num { 
     color: #ffffff;
     font-weight: 500;
@@ -423,13 +422,13 @@
     <div class="value" id="val-pnl">—</div>
   </div>
   <div class="metric-card" id="card-winrate" style="position:relative;">
-    <div style="position:absolute; top:var(--card-padding); right:var(--card-padding); display:flex; flex-direction:column; align-items:center; width:80px;">
-      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:80px; height:50px;">
+    <div style="position:absolute; top:50%; right:var(--card-padding); transform:translateY(-50%); display:flex; flex-direction:column; align-items:center;">
+      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:70px; height:44px;">
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round"/>
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" id="gauge-arc-loss" stroke-dasharray="94.25" stroke-dashoffset="0"/>
         <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" id="gauge-arc" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
       </svg>
-      <div class="gauge-stats" style="margin-top:8px;">
+      <div class="gauge-stats" style="margin-top:6px;">
         <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div></div>
         <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div></div>
         <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div></div>
@@ -439,10 +438,10 @@
     <div class="value" id="val-winrate" style="margin-top:4px;">—</div>
   </div>
   <div class="metric-card" id="card-pf" style="position:relative;">
-    <div style="position:absolute; top:var(--card-padding); right:var(--card-padding); display:flex; flex-direction:column; align-items:center; width:80px;">
-      <svg class="gauge-svg" viewBox="0 0 80 80" style="width:80px; height:80px;">
-        <circle cx="40" cy="40" r="32" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="0" transform="rotate(-90 40 40)"/>
-        <circle cx="40" cy="40" r="32" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="201" id="pf-gauge-circle" transform="rotate(-90 40 40)"/>
+    <div style="position:absolute; top:50%; right:var(--card-padding); transform:translateY(-50%); display:flex; justify-content:center;">
+      <svg class="gauge-svg" viewBox="0 0 64 64" style="width:70px; height:70px;">
+        <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
+        <circle cx="32" cy="32" r="28" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="176" id="pf-gauge-circle" transform="rotate(-90 32 32)"/>
       </svg>
     </div>
     <div class="label">Profit factor</div>
@@ -782,7 +781,7 @@ function renderMetrics() {
 
   // PF gauge (cap at 3 for visual)
   const pfGauge = document.getElementById('pf-gauge-circle');
-  const pfCircumference = 201; // 2 * PI * 32 ≈ 201
+  const pfCircumference = 176; // 2 * PI * 28 ≈ 176
   const pfPercent = Math.min(pf / 3, 1);
   pfGauge.style.strokeDashoffset = pfCircumference * (1 - pfPercent);
   pfGauge.style.stroke = pf >= 1 ? 'var(--green)' : 'var(--red)';
