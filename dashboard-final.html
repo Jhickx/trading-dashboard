@@ -423,12 +423,12 @@
   </div>
   <div class="metric-card" id="card-winrate" style="position:relative;">
     <div style="position:absolute; top:50%; right:var(--card-padding); transform:translateY(-50%); display:flex; flex-direction:column; align-items:center;">
-      <svg class="gauge-svg" viewBox="0 0 80 50" style="width:90px; height:56px;">
-        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round"/>
-        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" id="gauge-arc-loss" stroke-dasharray="94.25" stroke-dashoffset="0"/>
-        <path d="M 10 45 A 30 30 0 0 1 70 45" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" id="gauge-arc" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
+      <svg class="gauge-svg" viewBox="0 0 80 40" style="width:90px; height:45px;">
+        <path d="M 10 35 A 30 30 0 0 1 70 35" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 10 35 A 30 30 0 0 1 70 35" fill="none" stroke="#ff4757" stroke-width="6" stroke-linecap="round" id="gauge-arc-loss" stroke-dasharray="94.25" stroke-dashoffset="0"/>
+        <path d="M 10 35 A 30 30 0 0 1 70 35" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" id="gauge-arc" stroke-dasharray="94.25" stroke-dashoffset="94.25"/>
       </svg>
-      <div class="gauge-stats" style="margin-top:6px;">
+      <div class="gauge-stats" style="margin-top:8px;">
         <div class="gauge-stat win"><div class="gs-val" id="val-wins">0</div></div>
         <div class="gauge-stat neutral"><div class="gs-val" id="val-breakeven">0</div></div>
         <div class="gauge-stat loss"><div class="gs-val" id="val-losses">0</div></div>
@@ -872,12 +872,12 @@ function renderCumulativeChart() {
       }},
       scales: {
         x: {
-          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Sora', size: 10 }, maxRotation: 45 },
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 10 }, maxRotation: 45 },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         },
         y: {
-          ticks: { color: '#8e8e8e', font: { family: 'Sora', size: 10 }, callback: v => formatCurrency(v) },
+          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 10 }, callback: v => formatCurrency(v) },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         }
@@ -920,8 +920,8 @@ function renderDailyChart() {
           bodyColor: '#eef0f2',
           borderColor: '#1e252e',
           borderWidth: 1,
-          titleFont: { family: 'Sora', size: 11 },
-          bodyFont: { family: 'Sora', size: 13, weight: '600' },
+          titleFont: { family: 'Manrope', size: 11 },
+          bodyFont: { family: 'Manrope', size: 13, weight: '600' },
           callbacks: {
             title: function(items) { return items[0].label; },
             label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y || 0); }
@@ -931,12 +931,12 @@ function renderDailyChart() {
       },
       scales: {
         x: {
-          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Sora', size: 10 }, maxRotation: 45 },
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 10 }, maxRotation: 45 },
           grid: { display: false },
           border: { color: '#1e252e' }
         },
         y: {
-          ticks: { color: '#8e8e8e', font: { family: 'Sora', size: 10 }, callback: v => formatCurrency(v) },
+          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 10 }, callback: v => formatCurrency(v) },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         }
