@@ -61,10 +61,17 @@
     background: var(--color-bg-dark);
     color: var(--color-text);
     min-height: 100vh;
-    padding: var(--spacing-md) 0;
+    padding: var(--spacing-md);
     margin: 0 auto;
-    width: 95%;
+    width: calc(100% - 2 * var(--spacing-md));
     max-width: 1400px;
+  }
+  
+  @media (max-width: 600px) {
+    body {
+      padding: var(--spacing-sm);
+      width: calc(100% - 2 * var(--spacing-sm));
+    }
   }
 
   /* Header */
@@ -74,7 +81,18 @@
     align-items: center;
     margin-bottom: var(--spacing-lg);
     padding: var(--spacing-sm) 0;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
   }
+  
+  @media (max-width: 768px) {
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+    }
+  }
+  
   .header h1 {
     font-size: 1.4rem;
     font-weight: 700;
@@ -121,14 +139,32 @@
   /* Metric Cards */
   .metrics-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 16px;
     margin-bottom: 24px;
   }
+  
+  @media (min-width: 1200px) {
+    .metrics-row {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  @media (max-width: 900px) {
+    .metrics-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 600px) {
+    .metrics-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  
   .metric-card {
     background: var(--gradient-card);
-    border: 1px solid var(--color-border);
-    border-top: 1px solid var(--color-border-light);
+    border: 1px solid var(--color-border);\n    border-top: 1px solid var(--color-border-light);
     box-shadow: var(--shadow);
     border-radius: var(--rounded);
     padding: var(--card-padding);
@@ -197,6 +233,12 @@
     grid-template-columns: 1.4fr 1fr;
     gap: 16px;
     margin-bottom: 24px;
+  }
+  
+  @media (max-width: 900px) {
+    .charts-row {
+      grid-template-columns: 1fr;
+    }
   }
   .chart-card {
     background: var(--gradient-card);
@@ -319,20 +361,21 @@
     text-align: right;
   }
   .cal-day.today .day-num { 
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
     color: #ffffff;
     font-weight: 500;
     background: #e64848;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
     border-radius: 50%;
-    float: right;
-    clear: both;
+    text-align: center;
+    margin-bottom: 0;
   }
   .cal-day.today .day-pnl {
-    clear: both;
+    margin-top: 28px;
   }
   .cal-day .day-pnl {
     font-size: 13px;
@@ -440,7 +483,7 @@
     <div style="position:absolute; top:50%; right:var(--card-padding); transform:translateY(-50%); display:flex; justify-content:center;">
       <svg class="gauge-svg" viewBox="0 0 64 64" style="width:70px; height:70px;">
         <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
-        <circle cx="32" cy="32" r="28" fill="none" stroke="#00c9a7" stroke-width="6" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="176" id="pf-gauge-circle" transform="rotate(-90 32 32)"/>
+        <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(0,0%,20%)" stroke-width="6" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="176" id="pf-gauge-circle" transform="rotate(-90 32 32)"/>
       </svg>
     </div>
     <div class="label">Profit factor</div>
