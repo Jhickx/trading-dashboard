@@ -202,8 +202,6 @@
       z-index: 99;
       box-shadow: 2px 0 8px rgba(0,0,0,0.3);
       transition: transform 0.3s ease;
-    }
-    .sidebar.hide-sidebar {
       transform: translateX(-100%);
     }
     .sidebar.show-sidebar {
@@ -488,7 +486,7 @@
     background: #ffffff;
     border-radius: 50%;
     text-align: center;
-    display: inline-block;
+    display: block;
     margin-left: auto;
     margin-bottom: 4px;
   }
@@ -580,7 +578,7 @@
 </div>
 
 <div class="container">
-<aside class="sidebar show-sidebar">
+<aside class="sidebar">
   <a href="#" class="sidebar-link active-link">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
@@ -701,15 +699,23 @@
 function toggleSidebar() {
   const sidebar = document.querySelector('.sidebar');
   sidebar.classList.toggle('show-sidebar');
-  sidebar.classList.toggle('hide-sidebar');
 }
 
-// Close sidebar on window resize to desktop width
+// Initialize sidebar visibility on load
+window.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth > 800) {
+    sidebar.classList.add('show-sidebar');
+  }
+});
+
+// Handle sidebar on window resize
 window.addEventListener('resize', () => {
   const sidebar = document.querySelector('.sidebar');
   if (window.innerWidth > 800) {
     sidebar.classList.add('show-sidebar');
-    sidebar.classList.remove('hide-sidebar');
+  } else {
+    sidebar.classList.remove('show-sidebar');
   }
 });
 
