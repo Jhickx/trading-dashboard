@@ -267,12 +267,14 @@
     font-size: 12px;
     font-weight: 500;
     color: var(--color-text);
-    color: var(--text-secondary);
     display: flex;
     align-items: center;
     gap: 6px;
   }
-  .chart-card canvas { width: 100% !important; }
+  .chart-card canvas { 
+    width: 100% !important; 
+    height: 220px !important;
+  }
 
   /* Calendar */
   .calendar-section {
@@ -893,30 +895,20 @@ function renderCumulativeChart() {
         data: values,
         borderColor: 'rgba(142, 142, 142, 0.8)',
         borderWidth: 2,
-        pointRadius: 3,
+        pointRadius: 2,
         pointBackgroundColor: 'rgba(142, 142, 142, 0.8)',
-        pointBorderColor: '#fff',
-        pointBorderWidth: 1,
-        pointHoverRadius: 5,
+        pointBorderColor: 'rgba(142, 142, 142, 0.8)',
+        pointHoverRadius: 4,
         pointHoverBackgroundColor: 'rgba(142, 142, 142, 1)',
         pointHoverBorderColor: '#fff',
         pointHoverBorderWidth: 2,
-        fill: true,
-        backgroundColor: function(context) {
-          const chart = context.chart;
-          const {ctx: c, chartArea} = chart;
-          if (!chartArea) return 'transparent';
-          const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(142, 142, 142, 0.15)');
-          gradient.addColorStop(1, 'rgba(142, 142, 142, 0.0)');
-          return gradient;
-        },
-        tension: 0.4
+        fill: false,
+        tension: 0.5
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: {
         backgroundColor: '#1a2230',
         titleColor: '#6b7a8d',
@@ -932,12 +924,12 @@ function renderCumulativeChart() {
       }},
       scales: {
         x: {
-          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 12 }, maxRotation: 45 },
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 14 }, maxRotation: 45 },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         },
         y: {
-          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 12 }, callback: v => formatCurrency(v) },
+          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 14 }, callback: v => formatCurrency(v) },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         }
@@ -971,7 +963,7 @@ function renderDailyChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -991,12 +983,12 @@ function renderDailyChart() {
       },
       scales: {
         x: {
-          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 12 }, maxRotation: 45 },
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 14 }, maxRotation: 45 },
           grid: { display: false },
           border: { color: '#1e252e' }
         },
         y: {
-          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 12 }, callback: v => formatCurrency(v) },
+          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 14 }, callback: v => formatCurrency(v) },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         }
