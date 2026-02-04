@@ -103,6 +103,11 @@
     font-size: 13px;
     margin-top: 2px;
   }
+  
+  /* Apply button */
+  .apply-btn:hover {
+    background: var(--gradient-card-hover) !important;
+  }
 
   /* Config input for CSV URL */
   .config-bar {
@@ -457,11 +462,6 @@
   </div>
 </div>
 
-<style>
-.apply-btn:hover {
-  background: var(--gradient-card-hover);
-}
-</style>
 
 <div class="config-bar">
   <span style="color:var(--text-muted);font-size:12px;">Loading trade data...</span>
@@ -916,7 +916,7 @@ function renderCumulativeChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: {
         backgroundColor: '#1a2230',
         titleColor: '#6b7a8d',
@@ -971,7 +971,7 @@ function renderDailyChart() {
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
