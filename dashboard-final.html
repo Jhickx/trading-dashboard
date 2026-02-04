@@ -396,7 +396,7 @@
     width: 120px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 0;
   }
   .week-item {
     background: transparent;
@@ -408,6 +408,10 @@
     flex-direction: column;
     justify-content: center;
     text-align: center;
+    margin-bottom: 4px;
+  }
+  .week-item:last-child {
+    margin-bottom: 0;
   }
   .week-item .week-label {
     font-size: 0.6875rem;
@@ -420,6 +424,7 @@
   }
   .week-item .week-pnl.positive { color: var(--green); }
   .week-item .week-pnl.negative { color: var(--red); }
+  .week-item .week-pnl.neutral { color: var(--text-muted); }
   .week-item .week-days {
     font-size: 10px;
     color: var(--text-muted);
@@ -880,20 +885,24 @@ function renderCumulativeChart() {
       labels: labels,
       datasets: [{
         data: values,
-        borderColor: '#3b82f6',
-        borderWidth: 2,
+        borderColor: 'rgba(142, 142, 142, 0.6)',
+        borderWidth: 1.5,
         pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: 'rgba(142, 142, 142, 1)',
+        pointHoverBorderColor: '#fff',
+        pointHoverBorderWidth: 2,
         fill: true,
         backgroundColor: function(context) {
           const chart = context.chart;
           const {ctx: c, chartArea} = chart;
           if (!chartArea) return 'transparent';
           const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(59,130,246,0.3)');
-          gradient.addColorStop(1, 'rgba(59,130,246,0.0)');
+          gradient.addColorStop(0, 'rgba(142, 142, 142, 0.1)');
+          gradient.addColorStop(1, 'rgba(142, 142, 142, 0.0)');
           return gradient;
         },
-        tension: 0.1
+        tension: 0.3
       }]
     },
     options: {
@@ -1045,9 +1054,10 @@ function renderCalendar() {
     grid.appendChild(empty);
   }
 
-  // Track weeks for sidebar - calculate total rows needed
+  // Track weeks for sidebar - calculate total rows needed (including header row)
   const totalCells = startDow + daysInMonth;
-  const totalWeeks = Math.ceil(totalCells / 7);
+  const totalDayRows = Math.ceil(totalCells / 7);
+  const totalWeeks = totalDayRows; // Number of week items needed to match day rows
   const weeks = [];
   let currentWeek = { pnl: 0, tradingDays: 0 };
   let dayOfWeek = startDow;
@@ -1095,9 +1105,10 @@ function renderCalendar() {
     const week = weeks[i] || { pnl: 0, tradingDays: 0 };
     const item = document.createElement('div');
     item.className = 'week-item';
+    const pnlClass = week.pnl === 0 ? 'neutral' : (week.pnl >= 0 ? 'positive' : 'negative');
     item.innerHTML = `
       <div class="week-label">Week ${i+1}</div>
-      <div class="week-pnl ${week.pnl >= 0 ? 'positive' : 'negative'}">${formatCurrency(week.pnl)}</div>
+      <div class="week-pnl ${pnlClass}">${formatCurrency(week.pnl)}</div>
       <div class="week-days">${week.tradingDays} days</div>
     `;
     sidebar.appendChild(item);
