@@ -111,6 +111,105 @@
   .apply-btn:hover {
     background: var(--gradient-card-hover) !important;
   }
+  
+  /* Hamburger button */
+  .hamburger {
+    background: none;
+    border: none;
+    color: var(--color-text);
+    cursor: pointer;
+    padding: 8px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+  }
+  .hamburger:hover {
+    background: var(--color-bg-light);
+  }
+  .hamburger svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--color-text);
+  }
+  
+  @media (max-width: 800px) {
+    .hamburger {
+      display: flex;
+    }
+  }
+  
+  /* Layout container */
+  body > :not(.header) {
+    display: flex;
+    gap: 2rem;
+    position: relative;
+  }
+  
+  .main-content {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    position: sticky;
+    top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-self: flex-start;
+    width: 200px;
+    flex-shrink: 0;
+  }
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--color-text-light);
+    text-decoration: none;
+    border-radius: var(--rounded);
+    transition: background 0.2s ease;
+    font-size: 14px;
+  }
+  .sidebar-link:hover {
+    background: var(--color-bg-light);
+  }
+  .sidebar-link.active-link {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+  .sidebar-link.active-link svg {
+    stroke-width: 2.5;
+  }
+  .sidebar-link svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 800px) {
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      background: var(--color-bg-dark);
+      padding: 80px 20px 20px 20px;
+      z-index: 99;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+    }
+    .sidebar.hide-sidebar {
+      transform: translateX(-100%);
+    }
+    .sidebar.show-sidebar {
+      transform: translateX(0);
+    }
+  }
 
   /* Config input for CSV URL */
   .config-bar {
@@ -381,21 +480,17 @@
     text-align: right;
   }
   .cal-day.today .day-num { 
-    position: absolute;
-    top: 4px;
-    right: 4px;
     width: 24px;
     height: 24px;
     line-height: 24px;
-    color: #ffffff;
-    font-weight: 500;
-    background: #e64848;
+    color: var(--color-bg-dark);
+    font-weight: 600;
+    background: #ffffff;
     border-radius: 50%;
     text-align: center;
-    margin-bottom: 0;
-  }
-  .cal-day.today .day-pnl {
-    margin-top: 20px;
+    display: inline-block;
+    margin-left: auto;
+    margin-bottom: 4px;
   }
   .cal-day .day-pnl {
     font-size: 13px;
@@ -466,7 +561,14 @@
 <body>
 
 <div class="header">
-  <div>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" x2="20" y1="12" y2="12" />
+        <line x1="4" x2="20" y1="6" y2="6" />
+        <line x1="4" x2="20" y1="18" y2="18" />
+      </svg>
+    </button>
     <h1>Trading Dashboard</h1>
   </div>
   <div style="display:flex; gap:12px; align-items:center;">
@@ -477,6 +579,31 @@
   </div>
 </div>
 
+<aside class="sidebar show-sidebar">
+  <a href="#" class="sidebar-link active-link">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+      <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </svg>
+    Home
+  </a>
+  <a href="#" class="sidebar-link">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+      <path d="M7 16c.5-2 1.5-7 4-7 2 0 2 3 4 3 2.5 0 4.5-5 5-7" />
+    </svg>
+    Trades
+  </a>
+  <a href="#" class="sidebar-link">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+    Settings
+  </a>
+</aside>
+
+<div class="main-content">
 
 <div class="config-bar">
   <span style="color:var(--text-muted);font-size:12px;">Loading trade data...</span>
@@ -567,6 +694,24 @@
 </div>
 
 <script>
+// ============================================================
+// SIDEBAR TOGGLE
+// ============================================================
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.classList.toggle('show-sidebar');
+  sidebar.classList.toggle('hide-sidebar');
+}
+
+// Close sidebar on window resize to desktop width
+window.addEventListener('resize', () => {
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth > 800) {
+    sidebar.classList.add('show-sidebar');
+    sidebar.classList.remove('hide-sidebar');
+  }
+});
+
 // ============================================================
 // DATA STORE
 // ============================================================
@@ -1145,5 +1290,6 @@ function goToThisMonth() {
 // Initialize - load data after all functions are defined
 loadData();
 </script>
+</div> <!-- Close main-content -->
 </body>
 </html>
