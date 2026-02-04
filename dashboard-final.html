@@ -453,9 +453,15 @@
     <input type="date" id="dateFrom" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Manrope;font-size:12px;" />
     <span style="color:var(--text-secondary);">to</span>
     <input type="date" id="dateTo" style="background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);padding:8px 12px;border-radius:8px;font-family:Manrope;font-size:12px;" />
-    <button onclick="applyDateFilter()" style="background:var(--accent);color:#0a0c0f;border:none;padding:8px 16px;border-radius:8px;font-family:Manrope;font-weight:600;font-size:12px;cursor:pointer;">Apply</button>
+    <button onclick="applyDateFilter()" class="apply-btn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 16px;border-radius:8px;font-family:Manrope;font-weight:600;font-size:12px;cursor:pointer;transition:background 0.2s ease;">Apply</button>
   </div>
 </div>
+
+<style>
+.apply-btn:hover {
+  background: var(--gradient-card-hover);
+}
+</style>
 
 <div class="config-bar">
   <span style="color:var(--text-muted);font-size:12px;">Loading trade data...</span>
@@ -885,10 +891,13 @@ function renderCumulativeChart() {
       labels: labels,
       datasets: [{
         data: values,
-        borderColor: 'rgba(142, 142, 142, 0.6)',
-        borderWidth: 1.5,
-        pointRadius: 0,
-        pointHoverRadius: 4,
+        borderColor: 'rgba(142, 142, 142, 0.8)',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgba(142, 142, 142, 0.8)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1,
+        pointHoverRadius: 5,
         pointHoverBackgroundColor: 'rgba(142, 142, 142, 1)',
         pointHoverBorderColor: '#fff',
         pointHoverBorderWidth: 2,
@@ -898,11 +907,11 @@ function renderCumulativeChart() {
           const {ctx: c, chartArea} = chart;
           if (!chartArea) return 'transparent';
           const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, 'rgba(142, 142, 142, 0.1)');
+          gradient.addColorStop(0, 'rgba(142, 142, 142, 0.15)');
           gradient.addColorStop(1, 'rgba(142, 142, 142, 0.0)');
           return gradient;
         },
-        tension: 0.3
+        tension: 0.4
       }]
     },
     options: {
@@ -923,12 +932,12 @@ function renderCumulativeChart() {
       }},
       scales: {
         x: {
-          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 10 }, maxRotation: 45 },
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 12 }, maxRotation: 45 },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         },
         y: {
-          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 10 }, callback: v => formatCurrency(v) },
+          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 12 }, callback: v => formatCurrency(v) },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         }
@@ -982,12 +991,12 @@ function renderDailyChart() {
       },
       scales: {
         x: {
-          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 10 }, maxRotation: 45 },
+          ticks: { color: '#8e8e8e', maxTicksLimit: 8, font: { family: 'Manrope', size: 12 }, maxRotation: 45 },
           grid: { display: false },
           border: { color: '#1e252e' }
         },
         y: {
-          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 10 }, callback: v => formatCurrency(v) },
+          ticks: { color: '#8e8e8e', font: { family: 'Manrope', size: 12 }, callback: v => formatCurrency(v) },
           grid: { color: 'rgba(30,37,46,0.5)' },
           border: { color: '#1e252e' }
         }
