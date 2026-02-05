@@ -61,15 +61,13 @@
     background: var(--color-bg-dark);
     color: var(--color-text);
     min-height: 100vh;
-    padding: var(--spacing-md);
     margin: 0 auto;
     width: 95%;
-    max-width: 1280px;
   }
   
   @media (max-width: 600px) {
     body {
-      padding: var(--spacing-sm);
+      width: 95%;
     }
   }
 
@@ -82,8 +80,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-lg);
-    padding: var(--spacing-sm) 0;
+    padding: 1rem 0;
     gap: var(--spacing-md);
     flex-wrap: wrap;
   }
@@ -145,6 +142,7 @@
     display: flex;
     gap: 2rem;
     position: relative;
+    margin-top: 1rem;
   }
   
   .main-content {
@@ -162,6 +160,13 @@
     align-self: flex-start;
     width: 200px;
     flex-shrink: 0;
+    z-index: 10;
+  }
+  .show-sidebar {
+    display: flex !important;
+  }
+  .hide-sidebar {
+    display: none !important;
   }
   .sidebar-link {
     display: flex;
@@ -173,6 +178,7 @@
     border-radius: var(--rounded);
     transition: background 0.2s ease;
     font-size: 14px;
+    cursor: default;
   }
   .sidebar-link:hover {
     background: var(--color-bg-light);
@@ -201,11 +207,6 @@
       padding: 80px 20px 20px 20px;
       z-index: 99;
       box-shadow: 2px 0 8px rgba(0,0,0,0.3);
-      transition: transform 0.3s ease;
-      transform: translateX(-100%);
-    }
-    .sidebar.show-sidebar {
-      transform: translateX(0);
     }
   }
 
@@ -578,22 +579,22 @@
 </div>
 
 <div class="container">
-<aside class="sidebar">
-  <a href="#" class="sidebar-link active-link">
+<aside class="sidebar show-sidebar">
+  <a href="javascript:void(0)" class="sidebar-link active-link">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
       <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
     </svg>
     Home
   </a>
-  <a href="#" class="sidebar-link">
+  <a href="javascript:void(0)" class="sidebar-link">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M3 3v16a2 2 0 0 0 2 2h16" />
       <path d="M7 16c.5-2 1.5-7 4-7 2 0 2 3 4 3 2.5 0 4.5-5 5-7" />
     </svg>
     Trades
   </a>
-  <a href="#" class="sidebar-link">
+  <a href="javascript:void(0)" class="sidebar-link">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
       <circle cx="12" cy="12" r="3" />
@@ -699,23 +700,27 @@
 function toggleSidebar() {
   const sidebar = document.querySelector('.sidebar');
   sidebar.classList.toggle('show-sidebar');
+  sidebar.classList.toggle('hide-sidebar');
 }
 
-// Initialize sidebar visibility on load
+// Initialize sidebar visibility based on screen size
 window.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.querySelector('.sidebar');
-  if (window.innerWidth > 800) {
+  if (window.innerWidth <= 800) {
+    sidebar.classList.remove('show-sidebar');
+    sidebar.classList.add('hide-sidebar');
+  } else {
     sidebar.classList.add('show-sidebar');
+    sidebar.classList.remove('hide-sidebar');
   }
 });
 
 // Handle sidebar on window resize
 window.addEventListener('resize', () => {
   const sidebar = document.querySelector('.sidebar');
-  if (window.innerWidth > 800) {
+  if (window.innerWidth > 800 && sidebar.classList.contains('hide-sidebar')) {
+    sidebar.classList.remove('hide-sidebar');
     sidebar.classList.add('show-sidebar');
-  } else {
-    sidebar.classList.remove('show-sidebar');
   }
 });
 
