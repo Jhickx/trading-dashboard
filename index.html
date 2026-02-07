@@ -117,6 +117,73 @@
     stroke: var(--color-text);
   }
   
+  /* Account dropdown */
+  .account-dropdown-wrapper {
+    position: relative;
+  }
+  
+  .account-btn {
+    font-family: Manrope;
+    font-size: 12px;
+  }
+  
+  .account-btn:hover {
+    background: var(--gradient-card-hover);
+  }
+  
+  .account-btn svg {
+    stroke: var(--color-text);
+  }
+  
+  .account-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    padding: 8px 0;
+    z-index: 1000;
+  }
+  
+  .account-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  
+  .account-option:hover {
+    background: var(--color-bg-light);
+  }
+  
+  .account-option input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--green);
+  }
+  
+  .account-option label {
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--color-text);
+    flex: 1;
+  }
+  
+  .account-section-title {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 16px 8px 16px;
+    font-weight: 600;
+  }
+  
   /* Date Picker Modal */
   .date-picker-modal {
     position: fixed;
@@ -816,10 +883,37 @@
     <h1>Trading Dashboard</h1>
   </div>
   <div style="display:flex; gap:12px; align-items:center;">
-    <select id="accountSelect" onchange="filterByAccount()" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;font-family:Manrope;font-size:12px;cursor:pointer;">
-      <option value="all">All Accounts</option>
-    </select>
     <button onclick="toggleDatePicker()" class="calendar-btn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s ease;display:flex;align-items:center;gap:8px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      <span id="dateRangeText">All time</span>
+    </button>
+    <div class="account-dropdown-wrapper">
+      <button onclick="toggleAccountDropdown()" class="account-btn" id="accountBtn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s ease;display:flex;align-items:center;gap:8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span id="selectedAccountText">My Account</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div class="account-dropdown" id="accountDropdown" style="display:none;">
+        <div class="account-option" data-value="all">
+          <input type="checkbox" id="account-all" />
+          <label for="account-all">All accounts</label>
+        </div>
+        <div class="account-section-title">My accounts</div>
+        <div id="accountOptionsList"></div>
+      </div>
+    </div>
+  </div>
+</div>
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
         <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -939,7 +1033,11 @@
 </div>
 
 <!-- Metric Cards -->
-<div class="metrics-row">
+<div class="metrics-row" style="grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));">
+  <div class="metric-card" id="card-balance">
+    <div class="label">Account Balance</div>
+    <div class="value" id="val-current-balance" style="margin-top:4px;">—</div>
+  </div>
   <div class="metric-card" id="card-pnl">
     <div class="label">Net P&L </div>
     <div class="value" id="val-pnl">—</div>
@@ -980,28 +1078,6 @@
           <span class="win-label" id="label-avgwin">—</span>
           <span class="loss-label" id="label-avgloss">—</span>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Account Balance Card (if account selected) -->
-<div class="metrics-row" id="balance-card-row" style="display:none; grid-template-columns: 1fr;">
-  <div class="metric-card" id="card-balance">
-    <div class="label">Account Balance</div>
-    <div style="margin-top:8px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span style="font-size:12px; color:var(--text-muted);">Starting Balance</span>
-        <span style="font-size:14px; font-weight:600;" id="val-starting-balance">—</span>
-      </div>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span style="font-size:12px; color:var(--text-muted);">Trading P&L</span>
-        <span style="font-size:14px; font-weight:600;" id="val-trading-pnl">—</span>
-      </div>
-      <div style="height:1px; background:var(--color-border); margin:12px 0;"></div>
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:13px; font-weight:600;">Current Balance</span>
-        <span class="value" id="val-current-balance" style="font-size:20px;">—</span>
       </div>
     </div>
   </div>
@@ -1540,16 +1616,85 @@ function parseBalanceCSV(text) {
 }
 
 function populateAccountDropdown() {
-  const select = document.getElementById('accountSelect');
-  select.innerHTML = '<option value="all">All Accounts</option>';
+  const optionsList = document.getElementById('accountOptionsList');
+  optionsList.innerHTML = '';
   
-  availableAccounts.forEach(account => {
-    const option = document.createElement('option');
-    option.value = account;
-    option.textContent = account;
-    select.appendChild(option);
+  availableAccounts.forEach((account, index) => {
+    const option = document.createElement('div');
+    option.className = 'account-option';
+    option.setAttribute('data-value', account);
+    option.innerHTML = `
+      <input type="checkbox" id="account-${index}" />
+      <label for="account-${index}">${account}</label>
+    `;
+    option.onclick = () => selectAccount(account);
+    optionsList.appendChild(option);
   });
+  
+  // Set first account as default
+  if (availableAccounts.length > 0) {
+    selectedAccount = availableAccounts[0];
+    document.getElementById('selectedAccountText').textContent = selectedAccount;
+    updateAccountCheckboxes();
+    filterByAccount();
+  }
 }
+
+function toggleAccountDropdown() {
+  const dropdown = document.getElementById('accountDropdown');
+  dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+function selectAccount(account) {
+  selectedAccount = account;
+  document.getElementById('selectedAccountText').textContent = account;
+  updateAccountCheckboxes();
+  toggleAccountDropdown();
+  filterByAccount();
+}
+
+function updateAccountCheckboxes() {
+  // Uncheck all
+  document.getElementById('account-all').checked = false;
+  availableAccounts.forEach((_, index) => {
+    const checkbox = document.getElementById(`account-${index}`);
+    if (checkbox) checkbox.checked = false;
+  });
+  
+  // Check selected
+  if (selectedAccount === 'all') {
+    document.getElementById('account-all').checked = true;
+  } else {
+    const index = availableAccounts.indexOf(selectedAccount);
+    if (index >= 0) {
+      const checkbox = document.getElementById(`account-${index}`);
+      if (checkbox) checkbox.checked = true;
+    }
+  }
+}
+
+// Handle "All accounts" selection
+document.addEventListener('DOMContentLoaded', () => {
+  const allAccountsOption = document.querySelector('[data-value="all"]');
+  if (allAccountsOption) {
+    allAccountsOption.onclick = () => {
+      selectedAccount = 'all';
+      document.getElementById('selectedAccountText').textContent = 'All accounts';
+      updateAccountCheckboxes();
+      toggleAccountDropdown();
+      filterByAccount();
+    };
+  }
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  const wrapper = document.querySelector('.account-dropdown-wrapper');
+  const dropdown = document.getElementById('accountDropdown');
+  if (wrapper && dropdown && !wrapper.contains(e.target)) {
+    dropdown.style.display = 'none';
+  }
+});
 
 function parseCSVLine(line) {
   const result = [];
@@ -1682,9 +1827,7 @@ function renderAll() {
 }
 
 function filterByAccount() {
-  selectedAccount = document.getElementById('accountSelect').value;
-  
-  // Filter trades by account
+  // Filter trades by account (selectedAccount is set by selectAccount function)
   if (selectedAccount === 'all') {
     allTrades = [...allTradesUnfiltered];
   } else {
@@ -1786,26 +1929,28 @@ function renderMetrics() {
     lossPart.style.flex = (avgLoss / total2);
   }
   
-  // Account Balance (show only if specific account selected)
-  const balanceRow = document.getElementById('balance-card-row');
+  // Account Balance
+  const currentBalanceEl = document.getElementById('val-current-balance');
   if (selectedAccount !== 'all' && accountBalances[selectedAccount]) {
-    balanceRow.style.display = 'grid';
     const accountData = accountBalances[selectedAccount];
     const startingBalance = accountData.startingBalance;
     const tradingPnl = totalPnl;
     const currentBalance = startingBalance + tradingPnl;
     
-    document.getElementById('val-starting-balance').textContent = formatCurrencyFull(startingBalance);
-    
-    const tradingPnlEl = document.getElementById('val-trading-pnl');
-    tradingPnlEl.textContent = formatCurrencyFull(tradingPnl);
-    tradingPnlEl.className = tradingPnl >= 0 ? 'positive' : 'negative';
-    
-    const currentBalanceEl = document.getElementById('val-current-balance');
     currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
-    currentBalanceEl.className = 'value ' + (currentBalance >= startingBalance ? 'positive' : 'negative');
+    currentBalanceEl.className = 'value ' + (currentBalance >= 0 ? 'positive' : 'negative');
+  } else if (selectedAccount === 'all') {
+    // Show total across all accounts
+    let totalStarting = 0;
+    for (const acc in accountBalances) {
+      totalStarting += accountBalances[acc].startingBalance;
+    }
+    const currentBalance = totalStarting + totalPnl;
+    currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
+    currentBalanceEl.className = 'value ' + (currentBalance >= 0 ? 'positive' : 'negative');
   } else {
-    balanceRow.style.display = 'none';
+    currentBalanceEl.textContent = '—';
+    currentBalanceEl.className = 'value';
   }
 }
 
