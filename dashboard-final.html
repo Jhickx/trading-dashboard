@@ -857,17 +857,9 @@ function parseCSV(text) {
 
     if (!dateStr || !pnlStr) continue;
 
-    // Parse PnL: remove $, spaces, handle negative, handle European decimals
-    let pnlClean = pnlStr.replace(/[$\s]/g,'').replace(/'/g,'');
-    // Detect if using European number format (period as thousands, comma as decimal)
-    // e.g. "1.471,95" or "-1.471,95"
-    if (pnlClean.includes(',') && pnlClean.includes('.')) {
-      // European: remove dots (thousands separator), replace comma with dot
-      pnlClean = pnlClean.replace(/\./g,'').replace(',','.');
-    } else if (pnlClean.includes(',')) {
-      // Could be European decimal: "195,09"
-      pnlClean = pnlClean.replace(',','.');
-    }
+    // Parse PnL: US format only (comma = thousands separator, period = decimal)
+    let pnlClean = pnlStr.replace(/[$\s]/g, ''); // Remove $ and spaces
+    pnlClean = pnlClean.replace(/,/g, '');       // Remove commas (thousands separator)
     const pnl = parseFloat(pnlClean);
     if (isNaN(pnl)) continue;
 
@@ -1039,6 +1031,13 @@ function renderCumulativeChart() {
   // Generate all dates from first trade to last trade
   const start = new Date(keys[0]);
   const end = new Date(keys[keys.length-1]);
+  
+  // Add starting point at 0 (day before first trade)
+  const dayBeforeStart = new Date(start);
+  dayBeforeStart.setDate(dayBeforeStart.getDate() - 1);
+  labels.push(dayBeforeStart.getDate() + '/' + (dayBeforeStart.getMonth()+1) + '/' + String(dayBeforeStart.getFullYear()).slice(-2));
+  values.push(0);
+  
   const d = new Date(start);
   while (d <= end) {
     const key = formatDateKey(d);
