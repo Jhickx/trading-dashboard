@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trades - Trading Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ff: 'Manrope', sans-serif;
+      --color-bg-dark: #050505;
+      --color-bg: #0d0d0d;
+      --color-bg-light: #1a1a1a;
+      --gradient-card: linear-gradient(0deg, #0d0d0d 95%, #1a1a1a);
+      --gradient-card-hover: linear-gradient(0deg, #0d0d0d, #1a1a1a);
+      --color-border: #1a1a1a;
+      --color-border-light: #333333;
+      --color-text: #f2f2f2;
+      --color-text-light: #bfbfbf;
+      --text-secondary: #999999;
+      --text-muted: #8e8e8e;
+      --green: #00c9a7;
+      --red: #ff4757;
+      --rounded: 14px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: var(--ff);
+      background: var(--color-bg-dark);
+      color: var(--color-text);
+      min-height: 100vh;
+      margin: 0 auto;
+      width: 95%;
+    }
+    
+    /* Header */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+    .hamburger {
+      background: none;
+      border: none;
+      color: var(--color-text);
+      cursor: pointer;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+    .hamburger:hover {
+      background: var(--color-bg-light);
+    }
+    .hamburger svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--color-text);
+    }
+    
+    /* Container */
+    .container {
+      display: flex;
+      gap: 2rem;
+      position: relative;
+      margin-top: 1rem;
+    }
+    .main-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      position: sticky;
+      top: 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-self: flex-start;
+      width: 200px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .show-sidebar {
+      display: flex !important;
+    }
+    .hide-sidebar {
+      display: none !important;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--color-text-light);
+      text-decoration: none;
+      border-radius: var(--rounded);
+      transition: background 0.2s ease;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .sidebar-link:hover {
+      background: var(--color-bg-light);
+    }
+    .sidebar-link.active-link {
+      color: var(--color-text);
+      font-weight: 600;
+    }
+    .sidebar-link.active-link svg {
+      stroke-width: 2.5;
+    }
+    .sidebar-link svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      flex-shrink: 0;
+    }
+    
+    @media (max-width: 800px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        background: var(--color-bg-dark);
+        padding: 80px 20px 20px 20px;
+        z-index: 99;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+      }
+    }
+    
+    /* Trades Table */
+    .trades-header {
+      margin-bottom: 1.5rem;
+    }
+    .trades-header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+    .trades-count {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    .table-container {
+      background: var(--gradient-card);
+      border: 1px solid var(--color-border);
+      border-top: 1px solid var(--color-border-light);
+      border-radius: var(--rounded);
+      overflow: hidden;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    thead {
+      background: var(--color-bg-light);
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    th {
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.875rem;
+    }
+    
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    tbody tr:hover {
+      background: var(--color-bg-light);
+    }
+    
+    .positive {
+      color: var(--green);
+      font-weight: 600;
+    }
+    
+    .negative {
+      color: var(--red);
+      font-weight: 600;
+    }
+    
+    .neutral {
+      color: var(--text-muted);
+    }
+    
+    .win-badge, .loss-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .win-badge {
+      background: rgba(0, 201, 167, 0.1);
+      color: var(--green);
+    }
+    
+    .loss-badge {
+      background: rgba(255, 71, 87, 0.1);
+      color: var(--red);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex; align-items:center; gap:16px;">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Toggle menu">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="4" x2="20" y1="12" y2="12" />
+        <line x1="4" x2="20" y1="6" y2="6" />
+        <line x1="4" x2="20" y1="18" y2="18" />
+      </svg>
+    </button>
+    <h1>Trading Dashboard</h1>
+  </div>
+</div>
+
+<div class="container">
+  <aside class="sidebar show-sidebar">
+    <a href="index.html" class="sidebar-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+        <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      </svg>
+      Home
+    </a>
+    <a href="trades.html" class="sidebar-link active-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+        <path d="M7 16c.5-2 1.5-7 4-7 2 0 2 3 4 3 2.5 0 4.5-5 5-7" />
+      </svg>
+      Trades
+    </a>
+    <a href="javascript:void(0)" class="sidebar-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+      Settings
+    </a>
+  </aside>
+
+  <div class="main-content">
+    <div class="trades-header">
+      <h1>All Trades</h1>
+      <p class="trades-count" id="tradesCount">Loading...</p>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Ticker</th>
+            <th>Direction</th>
+            <th>Result</th>
+            <th>P&L</th>
+          </tr>
+        </thead>
+        <tbody id="tradesTableBody">
+          <tr>
+            <td colspan="5" class="loading">Loading trades...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// Sidebar toggle
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.classList.toggle('show-sidebar');
+  sidebar.classList.toggle('hide-sidebar');
+}
+
+// Initialize sidebar visibility based on screen size
+window.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth <= 800) {
+    sidebar.classList.remove('show-sidebar');
+    sidebar.classList.add('hide-sidebar');
+  } else {
+    sidebar.classList.add('show-sidebar');
+    sidebar.classList.remove('hide-sidebar');
+  }
+});
+
+// Handle sidebar on window resize
+window.addEventListener('resize', () => {
+  const sidebar = document.querySelector('.sidebar');
+  if (window.innerWidth > 800 && sidebar.classList.contains('hide-sidebar')) {
+    sidebar.classList.remove('hide-sidebar');
+    sidebar.classList.add('show-sidebar');
+  }
+});
+
+// Load and display trades
+const GVIZ_URL = 'https://docs.google.com/spreadsheets/d/1lr6NH8wkv0lZvuriRLG2nCSlg-VGH6D6JA5sxDE7Bus/gviz/tq?tqx=out:csv&gid=653744386';
+const PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_owNsVgezKK00Z8HGehudo_5gqajVxvCqMCeCCwSwkDhx9484DVHY3z9hWMds2ime/pub?gid=653744386&single=true&output=csv';
+
+async function loadTrades() {
+  const urls = [PUB_URL, GVIZ_URL];
+  
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const text = await res.text();
+      if (text.length < 100) continue;
+      
+      parseTrades(text);
+      return;
+    } catch(e) {
+      console.error('Error loading from', url, ':', e);
+      continue;
+    }
+  }
+  
+  document.getElementById('tradesTableBody').innerHTML = '<tr><td colspan="5" class="loading">Failed to load trades</td></tr>';
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function parseTrades(text) {
+  const lines = text.trim().split('\n');
+  const headers = parseCSVLine(lines[0]);
+  
+  const dateIdx = headers.findIndex(h => h.toLowerCase().includes('open date') || h.toLowerCase().includes('date'));
+  const pnlIdx = headers.findIndex(h => h.toLowerCase() === 'pnl');
+  const winlossIdx = headers.findIndex(h => h.toLowerCase().includes('win/loss'));
+  const tickerIdx = headers.findIndex(h => h.toLowerCase().includes('ticker'));
+  const directionIdx = headers.findIndex(h => h.toLowerCase().includes('direction'));
+  
+  const trades = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    const dateStr = cols[dateIdx];
+    const pnlStr = cols[pnlIdx];
+    
+    if (!dateStr || !pnlStr) continue;
+    
+    // Parse PnL
+    let pnlClean = pnlStr.replace(/[$\s]/g, '');
+    pnlClean = pnlClean.replace(/,/g, '');
+    const pnl = parseFloat(pnlClean);
+    if (isNaN(pnl)) continue;
+    
+    trades.push({
+      date: dateStr,
+      ticker: cols[tickerIdx] || '-',
+      direction: cols[directionIdx] || '-',
+      winLoss: cols[winlossIdx] ? cols[winlossIdx].toLowerCase() : '',
+      pnl: pnl
+    });
+  }
+  
+  displayTrades(trades);
+}
+
+function displayTrades(trades) {
+  const tbody = document.getElementById('tradesTableBody');
+  document.getElementById('tradesCount').textContent = `${trades.length} trades`;
+  
+  if (trades.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="loading">No trades found</td></tr>';
+    return;
+  }
+  
+  // Sort by date descending (most recent first)
+  trades.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  tbody.innerHTML = trades.map(trade => {
+    const pnlClass = trade.pnl > 0 ? 'positive' : trade.pnl < 0 ? 'negative' : 'neutral';
+    const pnlFormatted = trade.pnl >= 0 ? `+$${Math.abs(trade.pnl).toFixed(2)}` : `-$${Math.abs(trade.pnl).toFixed(2)}`;
+    
+    let resultBadge = '';
+    if (trade.winLoss.includes('win')) {
+      resultBadge = '<span class="win-badge">Win</span>';
+    } else if (trade.winLoss.includes('loss')) {
+      resultBadge = '<span class="loss-badge">Loss</span>';
+    } else {
+      resultBadge = '<span class="neutral">-</span>';
+    }
+    
+    return `
+      <tr>
+        <td>${trade.date}</td>
+        <td>${trade.ticker}</td>
+        <td>${trade.direction}</td>
+        <td>${resultBadge}</td>
+        <td class="${pnlClass}">${pnlFormatted}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Load trades on page load
+loadTrades();
+</script>
+
+</body>
+</html>
