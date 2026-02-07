@@ -1001,7 +1001,7 @@
 </div>
 
 <div class="container">
-<aside class="sidebar show-sidebar">
+<aside class="sidebar hide-sidebar">
   <a href="index.html" class="sidebar-link active-link">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
@@ -1030,17 +1030,21 @@
 <div class="config-bar">
   <span style="color:var(--text-muted);font-size:12px;">Loading trade data...</span>
   <span id="loadStatus" style="color:var(--green);font-size:12px;display:none;">✓ Data loaded</span>
+  <span id="loadTime" style="color:var(--text-muted);font-size:12px;margin-left:8px;display:none;"></span>
 </div>
 
 <!-- Metric Cards -->
 <div class="metrics-row" style="grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));">
   <div class="metric-card" id="card-balance">
-    <div class="label">Account Balance</div>
+    <div class="label">Account balance</div>
     <div class="value" id="val-current-balance" style="margin-top:4px;">—</div>
   </div>
   <div class="metric-card" id="card-pnl">
     <div class="label">Net P&L </div>
-    <div class="value" id="val-pnl">—</div>
+    <div style="display:flex; align-items:baseline; gap:8px;">
+      <div class="value" id="val-pnl">—</div>
+      <div id="val-pnl-percent" style="font-size:14px; color:var(--text-muted);">—</div>
+    </div>
   </div>
   <div class="metric-card" id="card-winrate" style="position:relative;">
     <div style="position:absolute; top:50%; right:var(--card-padding); transform:translateY(-50%); display:flex; flex-direction:column; align-items:center;">
@@ -1132,13 +1136,9 @@ function toggleSidebar() {
 // Initialize sidebar visibility based on screen size
 window.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.querySelector('.sidebar');
-  if (window.innerWidth <= 800) {
-    sidebar.classList.remove('show-sidebar');
-    sidebar.classList.add('hide-sidebar');
-  } else {
-    sidebar.classList.add('show-sidebar');
-    sidebar.classList.remove('hide-sidebar');
-  }
+  // Always start collapsed
+  sidebar.classList.remove('show-sidebar');
+  sidebar.classList.add('hide-sidebar');
 });
 
 // Handle sidebar on window resize
@@ -1532,6 +1532,15 @@ async function loadData() {
       console.log('Done!');
       statusEl.style.display = 'none';
       successEl.style.display = 'inline';
+      
+      // Show load time
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const timeEl = document.getElementById('loadTime');
+      timeEl.textContent = `${hours}:${minutes}`;
+      timeEl.style.display = 'inline';
+      
       return; // Stop after first success
     } catch(e) {
       console.error('Error loading from', url, ':', e);
@@ -1868,6 +1877,33 @@ function renderMetrics() {
   const pnlEl = document.getElementById('val-pnl');
   pnlEl.textContent = formatCurrencyFull(totalPnl);
   pnlEl.className = 'value ' + (totalPnl >= 0 ? 'positive' : 'negative');
+  
+  // Net P&L percentage (relative to starting balance)
+  const pnlPercentEl = document.getElementById('val-pnl-percent');
+  if (selectedAccount !== 'all' && accountBalances[selectedAccount]) {
+    const startingBalance = accountBalances[selectedAccount].startingBalance;
+    if (startingBalance > 0) {
+      const pnlPercent = (totalPnl / startingBalance) * 100;
+      pnlPercentEl.textContent = `${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%`;
+      pnlPercentEl.style.color = pnlPercent >= 0 ? 'var(--green)' : 'var(--red)';
+    } else {
+      pnlPercentEl.textContent = '—';
+    }
+  } else if (selectedAccount === 'all') {
+    let totalStarting = 0;
+    for (const acc in accountBalances) {
+      totalStarting += accountBalances[acc].startingBalance;
+    }
+    if (totalStarting > 0) {
+      const pnlPercent = (totalPnl / totalStarting) * 100;
+      pnlPercentEl.textContent = `${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%`;
+      pnlPercentEl.style.color = pnlPercent >= 0 ? 'var(--green)' : 'var(--red)';
+    } else {
+      pnlPercentEl.textContent = '—';
+    }
+  } else {
+    pnlPercentEl.textContent = '—';
+  }
 
   // Win rate
   const wins = allTrades.filter(t => t.pnl > 0).length;
@@ -1937,8 +1973,19 @@ function renderMetrics() {
     const tradingPnl = totalPnl;
     const currentBalance = startingBalance + tradingPnl;
     
+    // Get balance at start of selected period
+    let balanceAtPeriodStart = startingBalance;
+    if (dateFilterFrom) {
+      // Calculate P&L before the period start
+      const tradesBeforePeriod = allTradesUnfiltered.filter(t => 
+        t.account === selectedAccount && t.date < dateFilterFrom
+      );
+      const pnlBeforePeriod = tradesBeforePeriod.reduce((s,t) => s + t.pnl, 0);
+      balanceAtPeriodStart = startingBalance + pnlBeforePeriod;
+    }
+    
     currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
-    currentBalanceEl.className = 'value ' + (currentBalance >= 0 ? 'positive' : 'negative');
+    currentBalanceEl.className = 'value ' + (currentBalance >= balanceAtPeriodStart ? 'positive' : 'negative');
   } else if (selectedAccount === 'all') {
     // Show total across all accounts
     let totalStarting = 0;
@@ -1946,8 +1993,17 @@ function renderMetrics() {
       totalStarting += accountBalances[acc].startingBalance;
     }
     const currentBalance = totalStarting + totalPnl;
+    
+    // Get balance at start of selected period for all accounts
+    let balanceAtPeriodStart = totalStarting;
+    if (dateFilterFrom) {
+      const tradesBeforePeriod = allTradesUnfiltered.filter(t => t.date < dateFilterFrom);
+      const pnlBeforePeriod = tradesBeforePeriod.reduce((s,t) => s + t.pnl, 0);
+      balanceAtPeriodStart = totalStarting + pnlBeforePeriod;
+    }
+    
     currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
-    currentBalanceEl.className = 'value ' + (currentBalance >= 0 ? 'positive' : 'negative');
+    currentBalanceEl.className = 'value ' + (currentBalance >= balanceAtPeriodStart ? 'positive' : 'negative');
   } else {
     currentBalanceEl.textContent = '—';
     currentBalanceEl.className = 'value';
@@ -2003,8 +2059,17 @@ function renderCumulativeChart() {
         pointHoverBackgroundColor: 'rgba(142, 142, 142, 1)',
         pointHoverBorderColor: '#fff',
         pointHoverBorderWidth: 2,
-        fill: false,
-        tension: 0.5
+        fill: true,
+        backgroundColor: function(context) {
+          const chart = context.chart;
+          const {ctx: c, chartArea} = chart;
+          if (!chartArea) return 'transparent';
+          const gradient = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+          gradient.addColorStop(0, 'rgba(142, 142, 142, 0.15)');
+          gradient.addColorStop(1, 'rgba(142, 142, 142, 0.0)');
+          return gradient;
+        },
+        tension: 0.3
       }]
     },
     options: {
