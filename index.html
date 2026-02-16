@@ -1795,6 +1795,8 @@ function parseDateTimeNew(str) {
   if (parts.length < 1) return null;
   
   const datePart = parts[0]; // "21/01/26"
+  const timePart = parts[1]; // "23:03" or undefined
+  
   const dateComponents = datePart.split('/');
   if (dateComponents.length !== 3) return null;
   
@@ -1802,8 +1804,14 @@ function parseDateTimeNew(str) {
   const month = parseInt(dateComponents[1]) - 1; // JS months are 0-indexed
   const year = 2000 + parseInt(dateComponents[2]); // "26" -> 2026
   
-  const date = new Date(year, month, day);
-  date.setHours(0, 0, 0, 0);
+  let hours = 0, minutes = 0;
+  if (timePart) {
+    const timeComponents = timePart.split(':');
+    hours = parseInt(timeComponents[0]) || 0;
+    minutes = parseInt(timeComponents[1]) || 0;
+  }
+  
+  const date = new Date(year, month, day, hours, minutes, 0, 0);
   
   return date;
 }
