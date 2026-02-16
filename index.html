@@ -904,10 +904,6 @@
         </svg>
       </button>
       <div class="account-dropdown" id="accountDropdown" style="display:none;">
-        <div class="account-option" data-value="all">
-          <input type="checkbox" id="account-all" />
-          <label for="account-all">All accounts</label>
-        </div>
         <div class="account-section-title">My accounts</div>
         <div id="accountOptionsList"></div>
       </div>
@@ -1145,9 +1141,8 @@ let dailyChart = null;
 let dateFilterFrom = null;
 let dateFilterTo = null;
 
-// Account balance tracking
-let accountBalances = {}; // { "Account Name": { deposits: 0, withdrawals: 0, startingBalance: 0 } }
-let selectedAccount = 'all';
+// Account tracking
+let selectedAccount = 'Breakout 100K'; // Default to first account
 let availableAccounts = [];
 
 // ============================================================
@@ -1477,10 +1472,21 @@ function clearDateFilter() {
 // ============================================================
 // LOAD & PARSE CSV
 // ============================================================
-const GVIZ_URL = 'https://docs.google.com/spreadsheets/d/1lr6NH8wkv0lZvuriRLG2nCSlg-VGH6D6JA5sxDE7Bus/gviz/tq?tqx=out:csv&gid=653744386';
-const PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_owNsVgezKK00Z8HGehudo_5gqajVxvCqMCeCCwSwkDhx9484DVHY3z9hWMds2ime/pub?gid=653744386&single=true&output=csv';
+// Account sheets configuration
+const ACCOUNTS = [
+  {
+    name: "Breakout 100K",
+    gvizUrl: 'https://docs.google.com/spreadsheets/d/1lr6NH8wkv0lZvuriRLG2nCSlg-VGH6D6JA5sxDE7Bus/gviz/tq?tqx=out:csv&gid=653744386',
+    pubUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_owNsVgezKK00Z8HGehudo_5gqajVxvCqMCeCCwSwkDhx9484DVHY3z9hWMds2ime/pub?gid=653744386&single=true&output=csv'
+  },
+  {
+    name: "Bybit main",
+    gvizUrl: 'https://docs.google.com/spreadsheets/d/1lr6NH8wkv0lZvuriRLG2nCSlg-VGH6D6JA5sxDE7Bus/gviz/tq?tqx=out:csv&gid=759429748',
+    pubUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_owNsVgezKK00Z8HGehudo_5gqajVxvCqMCeCCwSwkDhx9484DVHY3z9hWMds2ime/pub?gid=759429748&single=true&output=csv'
+  }
+];
 
-// Balance sheet URLs
+// Old balance sheet URLs (no longer needed)
 const BALANCE_GVIZ_URL = 'https://docs.google.com/spreadsheets/d/1lr6NH8wkv0lZvuriRLG2nCSlg-VGH6D6JA5sxDE7Bus/gviz/tq?tqx=out:csv&gid=832249258';
 const BALANCE_PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_owNsVgezKK00Z8HGehudo_5gqajVxvCqMCeCCwSwkDhx9484DVHY3z9hWMds2ime/pub?gid=832249258&single=true&output=csv';
 
@@ -1489,53 +1495,66 @@ async function loadData() {
 
   console.log('Starting data load...');
 
-  // Load trades data
-  const urls = [PUB_URL, GVIZ_URL];
+  // Destroy existing charts before re-rendering
+  if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
+  if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
 
-  for (const url of urls) {
-    console.log('Trying URL:', url);
-    try {
-      const res = await fetch(url);
-      console.log('Fetch response:', res.status, res.ok);
-      if (!res.ok) continue;
-      const text = await res.text();
-      console.log('Text length:', text.length);
-      console.log('First 200 chars:', text.substring(0, 200));
-      if (text.length < 100) continue;
-      // Destroy existing charts before re-rendering
-      if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
-      if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
-      console.log('Parsing CSV...');
-      parseCSV(text);
-      console.log('Parsed trades:', allTrades.length);
-      
-      // Load balance data
-      await loadBalanceData();
-      
-      console.log('Rendering...');
-      renderAll();
-      console.log('Done!');
-      
-      // Update load status with time
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      statusEl.textContent = `✓ Data loaded ${hours}:${minutes}`;
-      statusEl.style.color = 'var(--green)';
-      
-      // Show calendar button
-      document.getElementById('calendarBtn').style.display = 'flex';
-      
-      return; // Stop after first success
-    } catch(e) {
-      console.error('Error loading from', url, ':', e);
-      continue;
+  allTradesUnfiltered = [];
+  availableAccounts = [];
+
+  // Load each account sheet
+  for (const account of ACCOUNTS) {
+    console.log(`Loading ${account.name}...`);
+    const urls = [account.pubUrl, account.gvizUrl];
+    
+    for (const url of urls) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const text = await res.text();
+        if (text.length < 100) continue;
+        
+        console.log(`Parsing ${account.name}...`);
+        const trades = parseAccountCSV(text, account.name);
+        allTradesUnfiltered.push(...trades);
+        availableAccounts.push(account.name);
+        console.log(`Loaded ${trades.length} trades from ${account.name}`);
+        break; // Success, move to next account
+      } catch(e) {
+        console.error(`Error loading ${account.name} from ${url}:`, e);
+        continue;
+      }
     }
   }
 
-  console.error('Failed to load from all URLs');
-  statusEl.textContent = '⚠ Failed to load data';
-  statusEl.style.color = 'var(--red)';
+  if (allTradesUnfiltered.length === 0) {
+    console.error('Failed to load from all accounts');
+    statusEl.textContent = '⚠ Failed to load data';
+    statusEl.style.color = 'var(--red)';
+    return;
+  }
+
+  console.log(`Total trades loaded: ${allTradesUnfiltered.length}`);
+  
+  // Set up account dropdown
+  populateAccountDropdown();
+  
+  // Filter by default account
+  filterByAccount();
+  
+  console.log('Rendering...');
+  renderAll();
+  console.log('Done!');
+  
+  // Update load status with time
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  statusEl.textContent = `✓ Data loaded ${hours}:${minutes}`;
+  statusEl.style.color = 'var(--green)';
+  
+  // Show calendar button
+  document.getElementById('calendarBtn').style.display = 'flex';
 }
 
 async function loadBalanceData() {
@@ -1649,37 +1668,18 @@ function selectAccount(account) {
 
 function updateAccountCheckboxes() {
   // Uncheck all
-  document.getElementById('account-all').checked = false;
   availableAccounts.forEach((_, index) => {
     const checkbox = document.getElementById(`account-${index}`);
     if (checkbox) checkbox.checked = false;
   });
   
   // Check selected
-  if (selectedAccount === 'all') {
-    document.getElementById('account-all').checked = true;
-  } else {
-    const index = availableAccounts.indexOf(selectedAccount);
-    if (index >= 0) {
-      const checkbox = document.getElementById(`account-${index}`);
-      if (checkbox) checkbox.checked = true;
-    }
+  const index = availableAccounts.indexOf(selectedAccount);
+  if (index >= 0) {
+    const checkbox = document.getElementById(`account-${index}`);
+    if (checkbox) checkbox.checked = true;
   }
 }
-
-// Handle "All accounts" selection
-document.addEventListener('DOMContentLoaded', () => {
-  const allAccountsOption = document.querySelector('[data-value="all"]');
-  if (allAccountsOption) {
-    allAccountsOption.onclick = () => {
-      selectedAccount = 'all';
-      document.getElementById('selectedAccountText').textContent = 'All accounts';
-      updateAccountCheckboxes();
-      toggleAccountDropdown();
-      filterByAccount();
-    };
-  }
-});
 
 // Close dropdown when clicking outside
 document.addEventListener('click', (e) => {
@@ -1709,6 +1709,103 @@ function parseCSVLine(line) {
   return result;
 }
 
+function parseAccountCSV(text, accountName) {
+  const lines = text.trim().split('\n');
+  const headers = parseCSVLine(lines[0]);
+  const trades = [];
+
+  console.log('Headers:', headers);
+
+  // New column structure from screenshot:
+  // ID, Open time, Close time, Ticker, Direction, Risk, Net P&L, Risk %, Net ROI %, R Multiple, Duration, Start Balance, Close Balance, Withdrawals, Notion
+  const closeTimeIdx = headers.findIndex(h => h.toLowerCase().includes('close time'));
+  const pnlIdx = headers.findIndex(h => h.toLowerCase().includes('net p&l'));
+  const tickerIdx = headers.findIndex(h => h.toLowerCase().includes('ticker'));
+  const directionIdx = headers.findIndex(h => h.toLowerCase().includes('direction'));
+  const startBalanceIdx = headers.findIndex(h => h.toLowerCase().includes('start balance'));
+  const closeBalanceIdx = headers.findIndex(h => h.toLowerCase().includes('close balance'));
+  const riskPercentIdx = headers.findIndex(h => h.toLowerCase().includes('risk') && h.toLowerCase().includes('%'));
+  const roiIdx = headers.findIndex(h => h.toLowerCase().includes('roi') || h.toLowerCase().includes('net roi'));
+  const rMultipleIdx = headers.findIndex(h => h.toLowerCase().includes('r multiple'));
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    
+    const closeTimeStr = cols[closeTimeIdx];
+    const pnlStr = cols[pnlIdx];
+
+    if (!closeTimeStr || !pnlStr) continue;
+
+    // Parse PnL: handle negative values with $ and commas
+    let pnlClean = pnlStr.replace(/[$\s]/g, '');
+    pnlClean = pnlClean.replace(/,/g, '');
+    const pnl = parseFloat(pnlClean);
+    if (isNaN(pnl)) continue;
+
+    // Parse close time: "21/01/26 23:03" format
+    const date = parseDateTimeNew(closeTimeStr);
+    if (!date) continue;
+
+    const dateKey = formatDateKey(date);
+    
+    // Parse start and close balance
+    const startBalanceStr = cols[startBalanceIdx];
+    const closeBalanceStr = cols[closeBalanceIdx];
+    let startBalance = 0, closeBalance = 0;
+    
+    if (startBalanceStr) {
+      let clean = startBalanceStr.replace(/[$\s,]/g, '');
+      startBalance = parseFloat(clean);
+    }
+    if (closeBalanceStr) {
+      let clean = closeBalanceStr.replace(/[$\s,]/g, '');
+      closeBalance = parseFloat(clean);
+    }
+
+    const trade = {
+      date,
+      dateKey,
+      pnl,
+      winLoss: pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven',
+      ticker: cols[tickerIdx] || '',
+      direction: cols[directionIdx] || '',
+      account: accountName,
+      startBalance,
+      closeBalance,
+      riskPercent: cols[riskPercentIdx] || '',
+      roi: cols[roiIdx] || '',
+      rMultiple: cols[rMultipleIdx] || ''
+    };
+    
+    trades.push(trade);
+  }
+
+  return trades;
+}
+
+// Parse new date format: "21/01/26 23:03" or "d/m/y h:mm"
+function parseDateTimeNew(str) {
+  if (!str) return null;
+  
+  // Format: "21/01/26 23:03" or "22/01/26 16:49"
+  const parts = str.trim().split(' ');
+  if (parts.length < 1) return null;
+  
+  const datePart = parts[0]; // "21/01/26"
+  const dateComponents = datePart.split('/');
+  if (dateComponents.length !== 3) return null;
+  
+  const day = parseInt(dateComponents[0]);
+  const month = parseInt(dateComponents[1]) - 1; // JS months are 0-indexed
+  const year = 2000 + parseInt(dateComponents[2]); // "26" -> 2026
+  
+  const date = new Date(year, month, day);
+  date.setHours(0, 0, 0, 0);
+  
+  return date;
+}
+
+// Keep old parseCSV for backwards compatibility (not used now)
 function parseCSV(text) {
   const lines = text.trim().split('\n');
   const headers = parseCSVLine(lines[0]);
@@ -1863,24 +1960,16 @@ function renderMetrics() {
   pnlEl.textContent = formatCurrencyFull(totalPnl);
   pnlEl.className = 'value ' + (totalPnl >= 0 ? 'positive' : 'negative');
   
-  // Net P&L percentage (relative to starting balance)
+  // Net P&L percentage (relative to starting balance of selected period)
   const pnlPercentEl = document.getElementById('val-pnl-percent');
-  if (selectedAccount !== 'all' && accountBalances[selectedAccount]) {
-    const startingBalance = accountBalances[selectedAccount].startingBalance;
+  if (allTrades.length > 0) {
+    // Get starting balance from first trade in the filtered set
+    const sortedTrades = [...allTrades].sort((a, b) => a.date - b.date);
+    const firstTrade = sortedTrades[0];
+    const startingBalance = firstTrade.startBalance;
+    
     if (startingBalance > 0) {
       const pnlPercent = (totalPnl / startingBalance) * 100;
-      pnlPercentEl.textContent = `${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%`;
-      pnlPercentEl.style.color = pnlPercent >= 0 ? 'var(--green)' : 'var(--red)';
-    } else {
-      pnlPercentEl.textContent = '—';
-    }
-  } else if (selectedAccount === 'all') {
-    let totalStarting = 0;
-    for (const acc in accountBalances) {
-      totalStarting += accountBalances[acc].startingBalance;
-    }
-    if (totalStarting > 0) {
-      const pnlPercent = (totalPnl / totalStarting) * 100;
       pnlPercentEl.textContent = `${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%`;
       pnlPercentEl.style.color = pnlPercent >= 0 ? 'var(--green)' : 'var(--red)';
     } else {
@@ -1950,41 +2039,26 @@ function renderMetrics() {
     lossPart.style.flex = (avgLoss / total2);
   }
   
-  // Account Balance
+  // Account Balance - use closeBalance from most recent trade
   const currentBalanceEl = document.getElementById('val-current-balance');
-  if (selectedAccount !== 'all' && accountBalances[selectedAccount]) {
-    const accountData = accountBalances[selectedAccount];
-    const startingBalance = accountData.startingBalance;
-    const tradingPnl = totalPnl;
-    const currentBalance = startingBalance + tradingPnl;
+  if (allTrades.length > 0) {
+    // Find most recent trade (they should be sorted by date)
+    const sortedTrades = [...allTrades].sort((a, b) => b.date - a.date);
+    const latestTrade = sortedTrades[0];
+    const currentBalance = latestTrade.closeBalance;
     
-    // Get balance at start of selected period
-    let balanceAtPeriodStart = startingBalance;
-    if (dateFilterFrom) {
-      // Calculate P&L before the period start
-      const tradesBeforePeriod = allTradesUnfiltered.filter(t => 
-        t.account === selectedAccount && t.date < dateFilterFrom
-      );
-      const pnlBeforePeriod = tradesBeforePeriod.reduce((s,t) => s + t.pnl, 0);
-      balanceAtPeriodStart = startingBalance + pnlBeforePeriod;
-    }
-    
-    currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
-    currentBalanceEl.className = 'value ' + (currentBalance >= balanceAtPeriodStart ? 'positive' : 'negative');
-  } else if (selectedAccount === 'all') {
-    // Show total across all accounts
-    let totalStarting = 0;
-    for (const acc in accountBalances) {
-      totalStarting += accountBalances[acc].startingBalance;
-    }
-    const currentBalance = totalStarting + totalPnl;
-    
-    // Get balance at start of selected period for all accounts
-    let balanceAtPeriodStart = totalStarting;
-    if (dateFilterFrom) {
-      const tradesBeforePeriod = allTradesUnfiltered.filter(t => t.date < dateFilterFrom);
-      const pnlBeforePeriod = tradesBeforePeriod.reduce((s,t) => s + t.pnl, 0);
-      balanceAtPeriodStart = totalStarting + pnlBeforePeriod;
+    // Get balance at start of period
+    let balanceAtPeriodStart = currentBalance;
+    if (dateFilterFrom && allTrades.length > 0) {
+      // Find first trade in the filtered period
+      const firstTradeInPeriod = [...allTrades].sort((a, b) => a.date - b.date)[0];
+      balanceAtPeriodStart = firstTradeInPeriod.startBalance;
+    } else {
+      // No date filter - use first trade's start balance
+      const firstTrade = [...allTradesUnfiltered].filter(t => t.account === selectedAccount).sort((a, b) => a.date - b.date)[0];
+      if (firstTrade) {
+        balanceAtPeriodStart = firstTrade.startBalance;
+      }
     }
     
     currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
