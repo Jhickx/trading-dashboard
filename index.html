@@ -1716,16 +1716,18 @@ function parseAccountCSV(text, accountName) {
 
   console.log('Headers:', headers);
 
-  // New column structure from screenshot:
-  // ID, Open time, Close time, Ticker, Direction, Risk, Net P&L, Risk %, Net ROI %, R Multiple, Duration, Start Balance, Close Balance, Withdrawals, Notion
+  // Column structure:
+  // ID, Open time, Close time, Ticker, Direction, Dollar risk, Net P&L, Percentage risk, Net ROI, R Multiple, Duration, Start Balance, Close Balance, Withdrawals, Notion
+  
   const closeTimeIdx = headers.findIndex(h => h.toLowerCase().includes('close time'));
-  const pnlIdx = headers.findIndex(h => h.toLowerCase().includes('net p&l'));
   const tickerIdx = headers.findIndex(h => h.toLowerCase().includes('ticker'));
   const directionIdx = headers.findIndex(h => h.toLowerCase().includes('direction'));
+  const pnlIdx = headers.findIndex(h => h.toLowerCase().includes('net p&l'));
   const startBalanceIdx = headers.findIndex(h => h.toLowerCase().includes('start balance'));
   const closeBalanceIdx = headers.findIndex(h => h.toLowerCase().includes('close balance'));
-  const riskPercentIdx = headers.findIndex(h => h.toLowerCase().includes('risk') && h.toLowerCase().includes('%'));
-  const roiIdx = headers.findIndex(h => h.toLowerCase().includes('roi') || h.toLowerCase().includes('net roi'));
+  const dollarRiskIdx = headers.findIndex(h => h.toLowerCase().includes('dollar risk'));
+  const percentageRiskIdx = headers.findIndex(h => h.toLowerCase().includes('percentage risk'));
+  const roiIdx = headers.findIndex(h => h.toLowerCase().includes('net roi'));
   const rMultipleIdx = headers.findIndex(h => h.toLowerCase().includes('r multiple'));
 
   for (let i = 1; i < lines.length; i++) {
@@ -1772,7 +1774,8 @@ function parseAccountCSV(text, accountName) {
       account: accountName,
       startBalance,
       closeBalance,
-      riskPercent: cols[riskPercentIdx] || '',
+      dollarRisk: cols[dollarRiskIdx] || '',
+      percentageRisk: cols[percentageRiskIdx] || '',
       roi: cols[roiIdx] || '',
       rMultiple: cols[rMultipleIdx] || ''
     };
