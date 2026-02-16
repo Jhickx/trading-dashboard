@@ -2039,26 +2039,32 @@ function renderMetrics() {
     lossPart.style.flex = (avgLoss / total2);
   }
   
-  // Account Balance - use closeBalance from most recent trade
+  // Account Balance - always show current (most recent) balance
   const currentBalanceEl = document.getElementById('val-current-balance');
-  if (allTrades.length > 0) {
-    // Find most recent trade (they should be sorted by date)
-    const sortedTrades = [...allTrades].sort((a, b) => b.date - a.date);
+  
+  // Get all trades for selected account (not filtered by date)
+  const accountTrades = allTradesUnfiltered.filter(t => t.account === selectedAccount);
+  
+  if (accountTrades.length > 0) {
+    // Current balance = close balance of most recent trade
+    const sortedTrades = [...accountTrades].sort((a, b) => b.date - a.date);
     const latestTrade = sortedTrades[0];
     const currentBalance = latestTrade.closeBalance;
     
-    // Get balance at start of period
-    let balanceAtPeriodStart = currentBalance;
-    if (dateFilterFrom && allTrades.length > 0) {
-      // Find first trade in the filtered period
-      const firstTradeInPeriod = [...allTrades].sort((a, b) => a.date - b.date)[0];
-      balanceAtPeriodStart = firstTradeInPeriod.startBalance;
-    } else {
-      // No date filter - use first trade's start balance
-      const firstTrade = [...allTradesUnfiltered].filter(t => t.account === selectedAccount).sort((a, b) => a.date - b.date)[0];
-      if (firstTrade) {
-        balanceAtPeriodStart = firstTrade.startBalance;
+    // Balance at start of filtered period
+    let balanceAtPeriodStart;
+    if (dateFilterFrom || dateFilterTo) {
+      // Use start balance of first trade in filtered period
+      const filteredSorted = [...allTrades].sort((a, b) => a.date - b.date);
+      if (filteredSorted.length > 0) {
+        balanceAtPeriodStart = filteredSorted[0].startBalance;
+      } else {
+        balanceAtPeriodStart = currentBalance;
       }
+    } else {
+      // No filter - compare to very first trade's start balance
+      const firstEverTrade = [...accountTrades].sort((a, b) => a.date - b.date)[0];
+      balanceAtPeriodStart = firstEverTrade.startBalance;
     }
     
     currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
@@ -2067,6 +2073,7 @@ function renderMetrics() {
     currentBalanceEl.textContent = '—';
     currentBalanceEl.className = 'value';
   }
+
 }
 
 // ============================================================
