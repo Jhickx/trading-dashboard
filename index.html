@@ -864,6 +864,48 @@
 
   /* Empty state for calendar days */
   .cal-day.empty { opacity: 0.3; }
+
+  /* Day trades popup */
+  .day-popup-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .day-popup {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--rounded);
+    padding: 1.5rem;
+    min-width: 320px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  }
+  .day-popup-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1rem;
+  }
+  .day-popup-title { font-size: 1rem; font-weight: 700; }
+  .day-popup-close {
+    background: none; border: none; color: var(--text-muted);
+    cursor: pointer; font-size: 1.2rem; padding: 4px;
+  }
+  .day-popup-trade {
+    display: grid; grid-template-columns: 1fr auto auto;
+    gap: 0.5rem 1rem; align-items: center;
+    padding: 0.6rem 0; border-bottom: 1px solid var(--color-border);
+    font-size: 0.875rem;
+  }
+  .day-popup-trade:last-child { border-bottom: none; }
+  .day-popup-ticker { font-weight: 700; }
+  .day-popup-direction { color: var(--text-muted); font-size: 0.8rem; }
+  .day-popup-total {
+    display: flex; justify-content: space-between;
+    margin-top: 1rem; padding-top: 0.75rem;
+    border-top: 1px solid var(--color-border-light);
+    font-size: 0.875rem; font-weight: 700;
+  }
+
 </style>
 </head>
 <body>
@@ -1103,6 +1145,18 @@
   </div>
 </div>
 
+<!-- Day trades popup -->
+<div id="dayPopupOverlay" class="day-popup-overlay" style="display:none;" onclick="closeDayPopup(event)">
+  <div class="day-popup" onclick="event.stopPropagation()">
+    <div class="day-popup-header">
+      <span class="day-popup-title" id="dayPopupTitle">Trades</span>
+      <button class="day-popup-close" onclick="closeDayPopup()">✕</button>
+    </div>
+    <div id="dayPopupTrades"></div>
+    <div class="day-popup-total" id="dayPopupTotal"></div>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // SIDEBAR TOGGLE
@@ -1222,18 +1276,18 @@ function populateMonthYearSelects() {
 function updateFromCalendar() {
   fromMonth = parseInt(document.getElementById('fromMonth').value);
   fromYear = parseInt(document.getElementById('fromYear').value);
-  renderCalendar('from', fromMonth, fromYear);
+  renderPickerCalendar('from', fromMonth, fromYear);
 }
 
 function updateToCalendar() {
   toMonth = parseInt(document.getElementById('toMonth').value);
   toYear = parseInt(document.getElementById('toYear').value);
-  renderCalendar('to', toMonth, toYear);
+  renderPickerCalendar('to', toMonth, toYear);
 }
 
 function updateBothCalendars() {
-  renderCalendar('from', fromMonth, fromYear);
-  renderCalendar('to', toMonth, toYear);
+  renderPickerCalendar('from', fromMonth, fromYear);
+  renderPickerCalendar('to', toMonth, toYear);
 }
 
 function prevMonth(type) {
@@ -1272,7 +1326,7 @@ function nextMonth(type) {
   updateBothCalendars();
 }
 
-function renderCalendar(type, month, year) {
+function renderPickerCalendar(type, month, year) {
   const container = document.getElementById(type === 'from' ? 'fromCalendar' : 'toCalendar');
   
   // Remove existing day cells only (keep the 7 weekday headers)
@@ -1397,16 +1451,13 @@ function applyDateFilterFromPicker() {
   dateFilterFrom = pickerFromDate;
   dateFilterTo = pickerToDate;
   
-  // Filter allTrades
-  if (dateFilterFrom || dateFilterTo) {
-    allTrades = allTradesUnfiltered.filter(t => {
-      if (dateFilterFrom && t.date < dateFilterFrom) return false;
-      if (dateFilterTo && t.date > dateFilterTo) return false;
-      return true;
-    });
-  } else {
-    allTrades = [...allTradesUnfiltered];
-  }
+  // Filter allTrades by account then date
+  allTrades = allTradesUnfiltered.filter(t => {
+    if (t.account !== selectedAccount) return false;
+    if (dateFilterFrom && t.date < dateFilterFrom) return false;
+    if (dateFilterTo && t.date > dateFilterTo) return false;
+    return true;
+  });
   
   // Rebuild dailyData from filtered trades
   dailyData = {};
@@ -1431,8 +1482,14 @@ function applyDateFilterFromPicker() {
     rangeText = `Until ${dateFilterTo.toLocaleDateString('en-GB', {day: '2-digit', month: 'short'})}`;
   }
   document.getElementById('dateRangeText').textContent = rangeText;
+
+  // Navigate main calendar to start of range
+  if (dateFilterFrom) {
+    calendarMonth = dateFilterFrom.getMonth();
+    calendarYear = dateFilterFrom.getFullYear();
+  }
   
-  toggleDatePicker();
+  closeDatePicker();
   renderAll();
 }
 
@@ -1931,6 +1988,46 @@ function formatCurrencyFull(val) {
 // ============================================================
 // RENDER ALL
 // ============================================================
+// ============================================================
+// DAY POPUP
+// ============================================================
+function openDayPopup(dateKey, day) {
+  const trades = allTrades.filter(t => t.dateKey === dateKey);
+  if (!trades.length) return;
+
+  const date = new Date(trades[0].date);
+  const dateStr = date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  document.getElementById('dayPopupTitle').textContent = dateStr;
+
+  const totalPnl = trades.reduce((s, t) => s + t.pnl, 0);
+  const totalClass = totalPnl >= 0 ? 'positive' : 'negative';
+  const totalStr = (totalPnl >= 0 ? '+' : '') + '$' + Math.abs(totalPnl).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  document.getElementById('dayPopupTrades').innerHTML = trades.map(t => {
+    const pnlClass = t.pnl >= 0 ? 'positive' : 'negative';
+    const pnlStr = (t.pnl >= 0 ? '+' : '') + '$' + Math.abs(t.pnl).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    return `<div class="day-popup-trade">
+      <span class="day-popup-ticker">${t.ticker}</span>
+      <span class="day-popup-direction">${t.direction}</span>
+      <span class="${pnlClass}">${pnlStr}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('dayPopupTotal').innerHTML = trades.length > 1
+    ? `<span style="color:var(--text-muted)">Total (${trades.length} trades)</span><span class="${totalClass}">${totalStr}</span>`
+    : '';
+
+  document.getElementById('dayPopupOverlay').style.display = 'flex';
+}
+
+function closeDayPopup(event) {
+  if (!event || event.target === document.getElementById('dayPopupOverlay')) {
+    document.getElementById('dayPopupOverlay').style.display = 'none';
+  }
+}
+
+// ============================================================
+
 function renderAll() {
   renderMetrics();
   renderCumulativeChart();
@@ -2060,36 +2157,33 @@ function renderMetrics() {
     lossPart.style.flex = (avgLoss / total2);
   }
   
-  // Account Balance - always show current (most recent) balance
+  // Account Balance - close balance of most recent trade in filtered period
   const currentBalanceEl = document.getElementById('val-current-balance');
-  
-  // Get all trades for selected account (not filtered by date)
   const accountTrades = allTradesUnfiltered.filter(t => t.account === selectedAccount);
   
   if (accountTrades.length > 0) {
-    // Current balance = close balance of most recent trade
-    const sortedTrades = [...accountTrades].sort((a, b) => b.date - a.date);
-    const latestTrade = sortedTrades[0];
-    const currentBalance = latestTrade.closeBalance;
+    // Most recent trade overall (for actual current balance)
+    const allSorted = [...accountTrades].sort((a, b) => b.date - a.date);
+    const currentBalance = allSorted[0].closeBalance;
     
-    // Balance at start of filtered period
+    // Balance at start of filtered period (for color comparison)
     let balanceAtPeriodStart;
-    if (dateFilterFrom || dateFilterTo) {
-      // Use start balance of first trade in filtered period
+    if (allTrades.length > 0) {
       const filteredSorted = [...allTrades].sort((a, b) => a.date - b.date);
-      if (filteredSorted.length > 0) {
-        balanceAtPeriodStart = filteredSorted[0].startBalance;
+      balanceAtPeriodStart = filteredSorted[0].startBalance;
+      // If date filter active, show close balance of last trade in period
+      if (dateFilterFrom || dateFilterTo) {
+        const lastInPeriod = [...allTrades].sort((a, b) => b.date - a.date)[0];
+        currentBalanceEl.textContent = formatCurrencyFull(lastInPeriod.closeBalance);
+        currentBalanceEl.className = 'value ' + (lastInPeriod.closeBalance >= balanceAtPeriodStart ? 'positive' : 'negative');
       } else {
-        balanceAtPeriodStart = currentBalance;
+        currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
+        currentBalanceEl.className = 'value ' + (currentBalance >= filteredSorted[0].startBalance ? 'positive' : 'negative');
       }
     } else {
-      // No filter - compare to very first trade's start balance
-      const firstEverTrade = [...accountTrades].sort((a, b) => a.date - b.date)[0];
-      balanceAtPeriodStart = firstEverTrade.startBalance;
+      currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
+      currentBalanceEl.className = 'value';
     }
-    
-    currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
-    currentBalanceEl.className = 'value ' + (currentBalance >= balanceAtPeriodStart ? 'positive' : 'negative');
   } else {
     currentBalanceEl.textContent = '—';
     currentBalanceEl.className = 'value';
@@ -2372,6 +2466,8 @@ function renderCalendar() {
         <div class="day-pnl ${data.pnl >= 0 ? 'positive' : 'negative'}">${formatCurrency(data.pnl)}</div>
         <div class="day-meta">${data.tradeCount} trade${data.tradeCount > 1 ? 's' : ''}<br>${data.tradeCount > 0 ? Math.round((data.wins/data.tradeCount)*100) : 0}%</div>
       `;
+      cell.style.cursor = 'pointer';
+      cell.addEventListener('click', () => openDayPopup(key, d));
     } else {
       cell.innerHTML = `<div class="day-num">${d}</div>`;
     }
