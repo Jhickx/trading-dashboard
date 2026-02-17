@@ -321,7 +321,7 @@
     background: var(--color-bg);
   }
   /* Fixed 6-row grid — popup never shifts height between months */
-  .calendar-grid {
+  .picker-grid {
     display: grid;
     grid-template-columns: repeat(7, 34px);
     grid-template-rows: 28px repeat(6, 34px);
@@ -695,27 +695,27 @@
 
   .calendar-grid-wrapper {
     display: flex;
-    gap: 16px;
+    gap: 4px;
+    align-items: stretch;
   }
-  
-  @media (max-width: 768px) {
-    .calendar-grid-wrapper {
-      flex-direction: column;
-    }
-    .weekly-sidebar {
-      flex-direction: row;
-      width: 100%;
-      overflow-x: auto;
-    }
-  }
-  
+
   .calendar-grid {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 4px;
     min-width: 0;
+    align-content: start;
   }
+
+  .weekly-sidebar {
+    width: 120px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
   .cal-header {
     font-size: 11px;
     color: var(--text-muted);
@@ -783,12 +783,12 @@
     border: 1px solid var(--color-border);
     border-radius: var(--rounded);
     padding: var(--spacing-xs);
-    min-height: 100px;
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
     text-align: center;
-    margin-bottom: 4px;
   }
   .week-item:last-child {
     margin-bottom: 0;
@@ -952,7 +952,7 @@
         <button id="clearFilterBtn" onclick="clearDateFilter()" title="Clear filter" style="display:none;background:var(--color-bg-light);border:1px solid var(--color-border);color:var(--text-muted);padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px;line-height:1;font-family:Manrope;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--text-muted)'">✕</button>
       </div>
       <div id="datePickerModal" class="date-picker-modal" style="display:none;">
-        <div class="date-picker-content">
+        <div class="date-picker-content" onclick="event.stopPropagation()">
           <div class="date-picker-layout">
             <div class="date-picker-left">
               <div class="date-picker-header">
@@ -977,7 +977,7 @@
                       </div>
                       <button onclick="nextMonth('from')" class="month-nav">›</button>
                     </div>
-                    <div class="calendar-grid" id="fromCalendar">
+                    <div class="picker-grid" id="fromCalendar">
                       <div class="cal-weekday">Su</div>
                       <div class="cal-weekday">Mo</div>
                       <div class="cal-weekday">Tu</div>
@@ -996,7 +996,7 @@
                       </div>
                       <button onclick="nextMonth('to')" class="month-nav">›</button>
                     </div>
-                    <div class="calendar-grid" id="toCalendar">
+                    <div class="picker-grid" id="toCalendar">
                       <div class="cal-weekday">Su</div>
                       <div class="cal-weekday">Mo</div>
                       <div class="cal-weekday">Tu</div>
@@ -1865,12 +1865,11 @@ document.addEventListener('click', (e) => {
   if (wrapper && dropdown && !wrapper.contains(e.target)) {
     dropdown.style.display = 'none';
   }
-  // Close date picker when clicking outside both the button and the modal
+  // Close date picker (content div has stopPropagation so only outside clicks reach here)
   const dateModal = document.getElementById('datePickerModal');
   if (dateModal && dateModal.style.display !== 'none') {
     const calendarBtnWrapper = document.getElementById('calendarBtnWrapper');
-    const outerWrapper = calendarBtnWrapper ? calendarBtnWrapper.parentElement : null;
-    if (outerWrapper && !outerWrapper.contains(e.target)) {
+    if (calendarBtnWrapper && !calendarBtnWrapper.contains(e.target)) {
       pickerSelectionPhase = 1;
       dateModal.style.display = 'none';
     }
@@ -2516,8 +2515,8 @@ function renderDailyChart() {
   if (keys.length === 0) return;
 
   const labels = keys.map(k => { const p = k.split('-'); return p[2] + '/' + p[1].replace(/^0/,'') + '/' + p[0].slice(-2); });
-  const positives = keys.map(k => dailyData[k].pnl > 0 ? dailyData[k].pnl : null);
-  const negatives = keys.map(k => dailyData[k].pnl < 0 ? dailyData[k].pnl : null);
+  const values = keys.map(k => dailyData[k].pnl);
+  const colors = values.map(v => v >= 0 ? '#00c9a7' : '#ff4757');
 
   const ctx = document.getElementById('dailyChart').getContext('2d');
   if (dailyChart) dailyChart.destroy();
@@ -2528,8 +2527,7 @@ function renderDailyChart() {
     data: {
       labels: labels,
       datasets: [
-        { data: positives, backgroundColor: '#00c9a7', borderRadius: 2 },
-        { data: negatives, backgroundColor: '#ff4757', borderRadius: 2 }
+        { data: values, backgroundColor: colors, borderRadius: 2 }
       ]
     },
     options: {
@@ -2552,8 +2550,7 @@ function renderDailyChart() {
           callbacks: {
             title: function(items) { return items[0].label; },
             label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y || 0); }
-          },
-          filter: function(item) { return item.parsed.y !== null; }
+          }
         }
       },
       scales: {
@@ -2585,44 +2582,46 @@ function renderCalendar() {
   grid.innerHTML = '';
   sidebar.innerHTML = '';
 
-  // Day headers (Mon-Sun)
-  const dayHeaders = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  dayHeaders.forEach(d => {
-    const h = document.createElement('div');
-    h.className = 'cal-header';
-    h.textContent = d;
-    grid.appendChild(h);
-  });
-  
-  // Add spacer header to sidebar to align with calendar headers
-  const sidebarHeader = document.createElement('div');
-  sidebarHeader.className = 'cal-header';
-  sidebarHeader.style.padding = '8px 0';
-  sidebarHeader.style.visibility = 'hidden'; // invisible but takes up space
-  sidebar.appendChild(sidebarHeader);
-
-  // First day of month (0=Sun, convert to Mon-based)
-  const firstDay = new Date(calendarYear, calendarMonth, 1);
-  let startDow = firstDay.getDay(); // 0=Sun
-  startDow = startDow === 0 ? 6 : startDow - 1; // Convert to Mon=0
+  // First day of month (Mon=0 system)
+  let startDow = new Date(calendarYear, calendarMonth, 1).getDay();
+  startDow = startDow === 0 ? 6 : startDow - 1;
 
   const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
   const today = new Date();
 
-  // Monthly PnL
-  let monthlyPnl = 0;
-  let tradingDays = 0;
+  // Monthly P&L totals
+  let monthlyPnl = 0, tradingDays = 0;
   for (let d = 1; d <= daysInMonth; d++) {
     const key = `${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    if (dailyData[key]) {
-      monthlyPnl += dailyData[key].pnl;
-      tradingDays++;
-    }
+    if (dailyData[key]) { monthlyPnl += dailyData[key].pnl; tradingDays++; }
   }
   const mpnlEl = document.getElementById('cal-monthly-pnl');
   mpnlEl.textContent = formatCurrency(monthlyPnl);
   mpnlEl.className = 'ms-pnl ' + (monthlyPnl >= 0 ? 'positive' : 'negative');
   document.getElementById('cal-trading-days').textContent = tradingDays + ' days';
+
+  // Day headers
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => {
+    const h = document.createElement('div');
+    h.className = 'cal-header';
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+
+  // Calculate total rows needed
+  const totalCells = startDow + daysInMonth;
+  const totalRows = Math.ceil(totalCells / 7);
+
+  // Invisible header spacer in sidebar
+  const hSpacer = document.createElement('div');
+  hSpacer.className = 'cal-header';
+  hSpacer.style.visibility = 'hidden';
+  sidebar.appendChild(hSpacer);
+
+  // Build week data
+  const weeks = [];
+  let currentWeek = { pnl: 0, tradingDays: 0 };
+  let dayOfWeek = startDow;
 
   // Empty cells before first day
   for (let i = 0; i < startDow; i++) {
@@ -2631,14 +2630,7 @@ function renderCalendar() {
     grid.appendChild(empty);
   }
 
-  // Track weeks for sidebar - calculate total rows needed (including header row)
-  const totalCells = startDow + daysInMonth;
-  const totalDayRows = Math.ceil(totalCells / 7);
-  const totalWeeks = totalDayRows; // Number of week items needed to match day rows
-  const weeks = [];
-  let currentWeek = { pnl: 0, tradingDays: 0 };
-  let dayOfWeek = startDow;
-
+  // Day cells
   for (let d = 1; d <= daysInMonth; d++) {
     const key = `${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const data = dailyData[key];
@@ -2652,7 +2644,6 @@ function renderCalendar() {
       cell.classList.add(data.pnl >= 0 ? 'positive' : 'negative');
       currentWeek.pnl += data.pnl;
       currentWeek.tradingDays++;
-
       cell.innerHTML = `
         <div class="day-num">${d}</div>
         <div class="day-pnl ${data.pnl >= 0 ? 'positive' : 'negative'}">${formatCurrency(data.pnl)}</div>
@@ -2663,27 +2654,36 @@ function renderCalendar() {
     } else {
       cell.innerHTML = `<div class="day-num">${d}</div>`;
     }
-
     grid.appendChild(cell);
 
-    // End of week (Sunday = dayOfWeek 6) or last day
-    if (dayOfWeek === 6) {
+    // End of week (Sunday = col 6 in Mon=0) or last day of month
+    if (dayOfWeek === 6 || d === daysInMonth) {
       weeks.push({...currentWeek});
       currentWeek = { pnl: 0, tradingDays: 0 };
     }
     dayOfWeek = (dayOfWeek + 1) % 7;
   }
-  
-  // Push final week if it exists
-  if (dayOfWeek !== 0) {
-    weeks.push({...currentWeek});
+
+  // Fill trailing empty cells to complete last row
+  const trailingEmpties = (7 - ((startDow + daysInMonth) % 7)) % 7;
+  for (let i = 0; i < trailingEmpties; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-day empty';
+    grid.appendChild(empty);
   }
 
-  // Render weekly sidebar - ensure we have entries for all rows
-  for (let i = 0; i < totalWeeks; i++) {
+  // Render sidebar week items — one per row, using flex to match grid row heights
+  // We use flex-grow on each item inside a flex-column sidebar
+  sidebar.style.display = 'flex';
+  sidebar.style.flexDirection = 'column';
+  sidebar.style.gap = '4px';
+
+  for (let i = 0; i < totalRows; i++) {
     const week = weeks[i] || { pnl: 0, tradingDays: 0 };
     const item = document.createElement('div');
     item.className = 'week-item';
+    item.style.flex = '1';
+    item.style.minHeight = '0';
     const pnlClass = week.pnl === 0 ? 'neutral' : (week.pnl >= 0 ? 'positive' : 'negative');
     item.innerHTML = `
       <div class="week-label">Week ${i+1}</div>
