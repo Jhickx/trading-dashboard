@@ -136,6 +136,21 @@
     stroke: var(--color-text);
   }
   
+  .btn-dropdown {
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border-light);
+    color: var(--color-text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: Manrope;
+    font-size: 12px;
+  }
+
   .account-dropdown {
     position: absolute;
     top: calc(100% + 8px);
@@ -328,7 +343,7 @@
     gap: 0;
     width: calc(7 * 34px);
   }
-  .cal-weekday {
+  .date-picker-weekday {
     width: 34px;
     height: 28px;
     display: flex;
@@ -338,7 +353,7 @@
     color: var(--text-muted);
     font-weight: 600;
   }
-  .cal-day-picker {
+  .date-picker-day {
     width: 34px;
     height: 34px;
     display: flex;
@@ -350,32 +365,36 @@
     transition: background 0.15s ease;
     user-select: none;
   }
-  .cal-day-picker:hover:not(.empty):not(.disabled) {
+  .date-picker-day:hover:not(.empty):not(.disabled) {
     background: rgba(255,255,255,0.1);
   }
-  .cal-day-picker.selected {
+  .date-picker-day.selected {
     background: rgba(255,255,255,0.2);
     color: var(--color-text);
     font-weight: 600;
     border: 1px solid rgba(255,255,255,0.35);
   }
-  .cal-day-picker.in-range {
+  .date-picker-day.in-range {
     background: rgba(255,255,255,0.07);
     border-radius: 0;
   }
-  .cal-day-picker.today {
+  .date-picker-day.today {
     border: 1px solid var(--color-border-light);
   }
-  .cal-day-picker.empty {
+  .date-picker-day.empty {
     cursor: default;
     pointer-events: none;
   }
-  .cal-day-picker.disabled {
+  .date-picker-day.disabled {
     color: var(--text-muted);
     opacity: 0.3;
     cursor: not-allowed;
   }
-    /* Hamburger button */
+    /* Utility classes */
+  .hidden { display: none; }
+  .pos-relative { position: relative; }
+  
+  /* Hamburger button */
   .hamburger {
     background: none;
     border: none;
@@ -693,13 +712,13 @@
   .monthly-stats .ms-pnl.negative { color: var(--red); }
   .monthly-stats .ms-days { color: var(--text-muted); font-size: 12px; }
 
-  .calendar-grid-wrapper {
+  .dashboard-calendar-wrapper {
     display: flex;
     gap: 4px;
     align-items: stretch;
   }
 
-  .calendar-grid {
+  .dashboard-calendar-grid {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -716,7 +735,7 @@
     gap: 4px;
   }
 
-  .cal-header {
+  .dashboard-cal-header {
     font-size: 11px;
     color: var(--text-muted);
     text-align: center;
@@ -724,7 +743,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  .cal-day {
+  .dashboard-cal-day {
     background: var(--color-bg-light);
     border-radius: var(--rounded);
     padding: var(--spacing-xs);
@@ -733,18 +752,18 @@
     border: 1px solid transparent;
     transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
   }
-  .cal-day.positive { background: rgba(0,201,167,0.08); border-color: rgba(0,201,167,0.2); }
-  .cal-day.negative { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.2); }
-  .cal-day.positive:hover { background: rgba(0,201,167,0.15); border-color: rgba(0,201,167,0.4); }
-  .cal-day.negative:hover { background: rgba(255,71,87,0.15); border-color: rgba(255,71,87,0.4); }
-  .cal-day:not(.positive):not(.negative):not(.empty):hover { background: #222; }
-  .cal-day .day-num {
+  .dashboard-cal-day.positive { background: rgba(0,201,167,0.08); border-color: rgba(0,201,167,0.2); }
+  .dashboard-cal-day.negative { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.2); }
+  .dashboard-cal-day.positive:hover { background: rgba(0,201,167,0.15); border-color: rgba(0,201,167,0.4); }
+  .dashboard-cal-day.negative:hover { background: rgba(255,71,87,0.15); border-color: rgba(255,71,87,0.4); }
+  .dashboard-cal-day:not(.positive):not(.negative):not(.empty):hover { background: #222; }
+  .dashboard-cal-day .day-num {
     font-size: 11px;
     color: var(--text-muted);
     margin-bottom: 4px;
     text-align: right;
   }
-  .cal-day.today .day-num { 
+  .dashboard-cal-day.today .day-num { 
     width: 24px;
     height: 24px;
     line-height: 24px;
@@ -757,14 +776,14 @@
     margin-left: auto;
     margin-bottom: 4px;
   }
-  .cal-day .day-pnl {
+  .dashboard-cal-day .day-pnl {
     font-size: 13px;
     font-weight: 600;
     letter-spacing: -0.3px;
   }
-  .cal-day .day-pnl.positive { color: var(--green); }
-  .cal-day .day-pnl.negative { color: var(--red); }
-  .cal-day .day-meta {
+  .dashboard-cal-day .day-pnl.positive { color: var(--green); }
+  .dashboard-cal-day .day-pnl.negative { color: var(--red); }
+  .dashboard-cal-day .day-meta {
     font-size: 10px;
     color: var(--text-muted);
     margin-top: 2px;
@@ -812,15 +831,9 @@
   }
 
   /* Loading */
-  .loading {
-    color: var(--text-secondary);
-    font-size: 13px;
-    padding: 40px;
-    text-align: center;
-  }
 
   /* Empty state for calendar days */
-  .cal-day.empty { opacity: 0.3; }
+  .dashboard-cal-day.empty { opacity: 0.3; }
 
   /* Chart expand button */
   .chart-expand-btn {
@@ -887,11 +900,6 @@
     border-bottom: 1px solid var(--color-border);
   }
   .day-popup-title { font-size: 0.95rem; font-weight: 700; }
-  .day-popup-close {
-    background: none; border: none; color: var(--text-muted);
-    cursor: pointer; font-size: 1.1rem; padding: 4px 6px;
-    border-radius: 4px; transition: background 0.15s ease;
-  }
   .day-popup-close:hover { background: var(--color-bg-light); color: var(--color-text); }
   .day-popup-table { width: 100%; border-collapse: collapse; }
   .day-popup-table thead { background: var(--color-bg-light); }
@@ -935,9 +943,9 @@
   <div style="display:flex; gap:12px; align-items:center;">
 
     <!-- Date Picker Button + Dropdown -->
-    <div style="position:relative;">
+    <div class="pos-relative">
       <div style="position:relative; display:none; align-items:center; gap:4px;" id="calendarBtnWrapper">
-        <button onclick="toggleDatePicker()" id="calendarBtn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:Manrope;font-size:12px;">
+        <button onclick="toggleDatePicker()" id="calendarBtn" class="btn-dropdown">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -951,7 +959,7 @@
         </button>
         <button id="clearFilterBtn" onclick="clearDateFilter()" title="Clear filter" style="display:none;background:var(--color-bg-light);border:1px solid var(--color-border);color:var(--text-muted);padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px;line-height:1;font-family:Manrope;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--text-muted)'">✕</button>
       </div>
-      <div id="datePickerModal" class="date-picker-modal" style="display:none;">
+      <div id="datePickerModal" class="date-picker-modal" class="hidden">
         <div class="date-picker-content" onclick="event.stopPropagation()">
           <div class="date-picker-layout">
             <div class="date-picker-left">
@@ -978,13 +986,13 @@
                       <button onclick="nextMonth('from')" class="month-nav">›</button>
                     </div>
                     <div class="picker-grid" id="fromCalendar">
-                      <div class="cal-weekday">Su</div>
-                      <div class="cal-weekday">Mo</div>
-                      <div class="cal-weekday">Tu</div>
-                      <div class="cal-weekday">We</div>
-                      <div class="cal-weekday">Th</div>
-                      <div class="cal-weekday">Fr</div>
-                      <div class="cal-weekday">Sa</div>
+                      <div class="date-picker-weekday">Su</div>
+                      <div class="date-picker-weekday">Mo</div>
+                      <div class="date-picker-weekday">Tu</div>
+                      <div class="date-picker-weekday">We</div>
+                      <div class="date-picker-weekday">Th</div>
+                      <div class="date-picker-weekday">Fr</div>
+                      <div class="date-picker-weekday">Sa</div>
                     </div>
                   </div>
                   <div class="calendar-picker" id="toCalendarWrapper">
@@ -997,13 +1005,13 @@
                       <button onclick="nextMonth('to')" class="month-nav">›</button>
                     </div>
                     <div class="picker-grid" id="toCalendar">
-                      <div class="cal-weekday">Su</div>
-                      <div class="cal-weekday">Mo</div>
-                      <div class="cal-weekday">Tu</div>
-                      <div class="cal-weekday">We</div>
-                      <div class="cal-weekday">Th</div>
-                      <div class="cal-weekday">Fr</div>
-                      <div class="cal-weekday">Sa</div>
+                      <div class="date-picker-weekday">Su</div>
+                      <div class="date-picker-weekday">Mo</div>
+                      <div class="date-picker-weekday">Tu</div>
+                      <div class="date-picker-weekday">We</div>
+                      <div class="date-picker-weekday">Th</div>
+                      <div class="date-picker-weekday">Fr</div>
+                      <div class="date-picker-weekday">Sa</div>
                     </div>
                   </div>
                 </div>
@@ -1025,7 +1033,7 @@
 
     <!-- Account Dropdown -->
     <div class="account-dropdown-wrapper">
-      <button onclick="toggleAccountDropdown()" id="accountBtn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:Manrope;font-size:12px;">
+      <button onclick="toggleAccountDropdown()" id="accountBtn" class="btn-dropdown">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
@@ -1035,7 +1043,7 @@
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </button>
-      <div class="account-dropdown" id="accountDropdown" style="display:none;">
+      <div class="account-dropdown" id="accountDropdown" class="hidden">
         <div class="account-section-title">My accounts</div>
         <div id="accountOptionsList"></div>
       </div>
@@ -1088,7 +1096,7 @@
       <div id="val-pnl-percent" style="font-size:14px; color:var(--text-muted);">—</div>
     </div>
   </div>
-  <div class="metric-card" id="card-winrate" style="position:relative;">
+  <div class="metric-card" id="card-winrate" class="pos-relative">
     <div style="position:absolute; top:50%; right:var(--card-padding); transform:translateY(-50%); display:flex; flex-direction:column; align-items:center;">
       <svg class="gauge-svg" viewBox="0 0 80 40" style="width:90px; height:45px;">
         <path d="M 10 35 A 30 30 0 0 1 70 35" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round"/>
@@ -1104,7 +1112,7 @@
     <div class="label">Trade win %</div>
     <div class="value" id="val-winrate" style="margin-top:4px;">—</div>
   </div>
-  <div class="metric-card" id="card-pf" style="position:relative;">
+  <div class="metric-card" id="card-pf" class="pos-relative">
     <div style="position:absolute; top:50%; right:var(--card-padding); transform:translateY(-50%); display:flex; justify-content:center;">
       <svg class="gauge-svg" viewBox="0 0 64 64" style="width:70px; height:70px;">
         <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(0,0%,10%)" stroke-width="6" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="0" transform="rotate(-90 32 32)"/>
@@ -1172,13 +1180,13 @@
     </div>
   </div>
   <div class="calendar-grid-wrapper">
-    <div class="calendar-grid" id="calendarGrid"></div>
+    <div class="calendar-grid" id="dashboardCalendarGrid"></div>
     <div class="weekly-sidebar" id="weeklySidebar"></div>
   </div>
 </div>
 
 <!-- Chart expand popup -->
-<div id="chartExpandOverlay" class="day-popup-overlay" style="display:none;" onclick="closeChartExpand(event)">
+<div id="chartExpandOverlay" class="day-popup-overlay" class="hidden" onclick="closeChartExpand(event)">
   <div class="chart-expand-popup" onclick="event.stopPropagation()">
     <div class="day-popup-header" style="padding:1rem 1.4rem;">
       <span class="day-popup-title" id="chartExpandTitle">Chart</span>
@@ -1190,7 +1198,7 @@
 </div>
 
 <!-- Day trades popup -->
-<div id="dayPopupOverlay" class="day-popup-overlay" style="display:none;" onclick="closeDayPopup(event)">
+<div id="dayPopupOverlay" class="day-popup-overlay" class="hidden" onclick="closeDayPopup(event)">
   <div class="day-popup" onclick="event.stopPropagation()">
     <div class="day-popup-header">
       <span class="day-popup-title" id="dayPopupTitle">Trades</span>
@@ -1406,7 +1414,7 @@ function renderPickerCalendar(type, month, year) {
 
   // Clear all non-weekday cells
   Array.from(container.children).forEach(child => {
-    if (!child.classList.contains('cal-weekday')) child.remove();
+    if (!child.classList.contains('date-picker-weekday')) child.remove();
   });
 
   const firstDay = new Date(year, month, 1).getDay();
@@ -1423,11 +1431,11 @@ function renderPickerCalendar(type, month, year) {
 
     if (dayNum < 1 || dayNum > daysInMonth) {
       // Empty filler cell — no text, no click
-      el.className = 'cal-day-picker empty';
+      el.className = 'dashboard-date-picker-day empty';
     } else {
       const date = new Date(year, month, dayNum);
       date.setHours(0, 0, 0, 0);
-      const classes = ['cal-day-picker'];
+      const classes = ['dashboard-date-picker-day'];
 
       if (date.getTime() === today.getTime()) classes.push('today');
 
@@ -1661,18 +1669,15 @@ const ACCOUNTS = [
   }
 ];
 
-// Old balance sheet URLs (no longer needed)
-const BALANCE_GVIZ_URL = 'https://docs.google.com/spreadsheets/d/1lr6NH8wkv0lZvuriRLG2nCSlg-VGH6D6JA5sxDE7Bus/gviz/tq?tqx=out:csv&gid=832249258';
-const BALANCE_PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQH3jFflZ0yd3k_owNsVgezKK00Z8HGehudo_5gqajVxvCqMCeCCwSwkDhx9484DVHY3z9hWMds2ime/pub?gid=832249258&single=true&output=csv';
-
 async function loadData() {
   const statusEl = document.getElementById('loadStatus');
 
-  console.log('Starting data load...');
+  try {
+    console.log('Starting data load...');
 
-  // Destroy existing charts before re-rendering
-  if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
-  if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
+    // Destroy existing charts before re-rendering
+    if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
+    if (dailyChart) { dailyChart.destroy(); dailyChart = null; }
 
   allTradesUnfiltered = [];
   availableAccounts = [];
@@ -1731,77 +1736,10 @@ async function loadData() {
   // Show calendar button
   document.getElementById('calendarBtnWrapper').style.display = 'flex';
   document.getElementById('calendarBtn').style.display = 'flex';
-}
-
-async function loadBalanceData() {
-  const urls = [BALANCE_PUB_URL, BALANCE_GVIZ_URL];
-  
-  for (const url of urls) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) continue;
-      const text = await res.text();
-      if (text.length < 50) continue;
-      
-      parseBalanceCSV(text);
-      populateAccountDropdown();
-      return;
-    } catch(e) {
-      console.error('Error loading balance data from', url, ':', e);
-      continue;
-    }
+  } catch (error) {
+    console.error('Error loading data:', error);
+    if (statusEl) statusEl.textContent = 'Error loading data. Please refresh the page.';
   }
-  
-  console.warn('Could not load balance data');
-}
-
-function parseBalanceCSV(text) {
-  const lines = text.trim().split('\n');
-  const headers = parseCSVLine(lines[0]);
-  
-  // Find column indices
-  const accountIdx = headers.findIndex(h => h.toLowerCase().includes('account'));
-  const typeIdx = headers.findIndex(h => h.toLowerCase().includes('type'));
-  const amountIdx = headers.findIndex(h => h.toLowerCase().includes('amount'));
-  
-  accountBalances = {};
-  availableAccounts = [];
-  
-  for (let i = 1; i < lines.length; i++) {
-    const cols = parseCSVLine(lines[i]);
-    const account = cols[accountIdx];
-    const type = cols[typeIdx] ? cols[typeIdx].toLowerCase() : '';
-    const amountStr = cols[amountIdx];
-    
-    if (!account || !amountStr) continue;
-    
-    // Parse amount
-    let amountClean = amountStr.replace(/[$\s]/g, '');
-    amountClean = amountClean.replace(/,/g, '');
-    const amount = parseFloat(amountClean);
-    if (isNaN(amount)) continue;
-    
-    // Initialize account if not exists
-    if (!accountBalances[account]) {
-      accountBalances[account] = { deposits: 0, withdrawals: 0 };
-      availableAccounts.push(account);
-    }
-    
-    // Add to deposits or withdrawals
-    if (type.includes('deposit')) {
-      accountBalances[account].deposits += amount;
-    } else if (type.includes('withdrawal')) {
-      accountBalances[account].withdrawals += amount;
-    }
-  }
-  
-  // Calculate starting balance for each account
-  for (const account in accountBalances) {
-    accountBalances[account].startingBalance = 
-      accountBalances[account].deposits - accountBalances[account].withdrawals;
-  }
-  
-  console.log('Account balances:', accountBalances);
 }
 
 function populateAccountDropdown() {
@@ -2099,18 +2037,16 @@ function formatDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 
-function formatCurrency(val) {
+function formatCurrency(val, full = false) {
   const abs = Math.abs(val);
-  let str;
-  if (abs >= 1000) str = '$' + (abs/1000).toFixed(1) + 'K';
-  else str = '$' + abs.toFixed(2);
-  return (val < 0 ? '-' : '') + str;
-}
-
-function formatCurrencyFull(val) {
   const sign = val < 0 ? '-' : '';
-  const abs = Math.abs(val);
-  return sign + '$' + abs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  
+  if (full) {
+    return sign + '$' + abs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  
+  if (abs >= 1000) return sign + '$' + (abs/1000).toFixed(1) + 'K';
+  return sign + '$' + abs.toFixed(2);
 }
 
 // ============================================================
@@ -2266,7 +2202,7 @@ function renderMetrics() {
   // Net PnL
   const totalPnl = allTrades.reduce((s,t) => s + t.pnl, 0);
   const pnlEl = document.getElementById('val-pnl');
-  pnlEl.textContent = formatCurrencyFull(totalPnl);
+  pnlEl.textContent = formatCurrency(totalPnl, true);
   pnlEl.className = 'value ' + (totalPnl >= 0 ? 'positive' : 'negative');
   
   // Net P&L percentage (relative to starting balance of selected period)
@@ -2365,14 +2301,14 @@ function renderMetrics() {
       // If date filter active, show close balance of last trade in period
       if (dateFilterFrom || dateFilterTo) {
         const lastInPeriod = [...allTrades].sort((a, b) => b.date - a.date)[0];
-        currentBalanceEl.textContent = formatCurrencyFull(lastInPeriod.closeBalance);
+        currentBalanceEl.textContent = formatCurrency(lastInPeriod.closeBalance, true);
         currentBalanceEl.className = 'value ' + (lastInPeriod.closeBalance >= balanceAtPeriodStart ? 'positive' : 'negative');
       } else {
-        currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
+        currentBalanceEl.textContent = formatCurrency(currentBalance, true);
         currentBalanceEl.className = 'value ' + (currentBalance >= filteredSorted[0].startBalance ? 'positive' : 'negative');
       }
     } else {
-      currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
+      currentBalanceEl.textContent = formatCurrency(currentBalance, true);
       currentBalanceEl.className = 'value';
     }
   } else {
@@ -2487,7 +2423,7 @@ function renderCumulativeChart() {
         bodyFont: { family: 'Manrope', size: 13, weight: '600' },
         callbacks: {
           title: function(items) { return items[0].label; },
-          label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y); }
+          label: function(item) { return ' ' + formatCurrency(item.parsed.y, true); }
         }
       }},
       scales: {
@@ -2549,7 +2485,7 @@ function renderDailyChart() {
           bodyFont: { family: 'Manrope', size: 13, weight: '600' },
           callbacks: {
             title: function(items) { return items[0].label; },
-            label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y || 0); }
+            label: function(item) { return ' ' + formatCurrency(item.parsed.y || 0, true); }
           }
         }
       },
@@ -2577,7 +2513,7 @@ function renderCalendar() {
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-month-title').textContent = monthNames[calendarMonth] + ' ' + calendarYear;
 
-  const grid = document.getElementById('calendarGrid');
+  const grid = document.getElementById('dashboardCalendarGrid');
   const sidebar = document.getElementById('weeklySidebar');
   grid.innerHTML = '';
   sidebar.innerHTML = '';
@@ -2603,7 +2539,7 @@ function renderCalendar() {
   // Day headers
   ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => {
     const h = document.createElement('div');
-    h.className = 'cal-header';
+    h.className = 'dashboard-cal-header';
     h.textContent = d;
     grid.appendChild(h);
   });
@@ -2614,7 +2550,7 @@ function renderCalendar() {
 
   // Invisible header spacer in sidebar
   const hSpacer = document.createElement('div');
-  hSpacer.className = 'cal-header';
+  hSpacer.className = 'dashboard-cal-header';
   hSpacer.style.visibility = 'hidden';
   sidebar.appendChild(hSpacer);
 
@@ -2626,7 +2562,7 @@ function renderCalendar() {
   // Empty cells before first day
   for (let i = 0; i < startDow; i++) {
     const empty = document.createElement('div');
-    empty.className = 'cal-day empty';
+    empty.className = 'dashboard-cal-day empty';
     grid.appendChild(empty);
   }
 
@@ -2637,7 +2573,7 @@ function renderCalendar() {
     const isToday = (d === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear());
 
     const cell = document.createElement('div');
-    cell.className = 'cal-day';
+    cell.className = 'dashboard-cal-day';
     if (isToday) cell.classList.add('today');
 
     if (data) {
@@ -2668,7 +2604,7 @@ function renderCalendar() {
   const trailingEmpties = (7 - ((startDow + daysInMonth) % 7)) % 7;
   for (let i = 0; i < trailingEmpties; i++) {
     const empty = document.createElement('div');
-    empty.className = 'cal-day empty';
+    empty.className = 'dashboard-cal-day empty';
     grid.appendChild(empty);
   }
 
