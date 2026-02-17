@@ -136,21 +136,6 @@
     stroke: var(--color-text);
   }
   
-  .btn-dropdown {
-    background: var(--gradient-card);
-    border: 1px solid var(--color-border);
-    border-top: 1px solid var(--color-border-light);
-    color: var(--color-text);
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: Manrope;
-    font-size: 12px;
-  }
-
   .account-dropdown {
     position: absolute;
     top: calc(100% + 8px);
@@ -343,7 +328,7 @@
     gap: 0;
     width: calc(7 * 34px);
   }
-  .date-picker-weekday {
+  .cal-weekday {
     width: 34px;
     height: 28px;
     display: flex;
@@ -353,7 +338,7 @@
     color: var(--text-muted);
     font-weight: 600;
   }
-  .date-picker-day {
+  .cal-day-picker {
     width: 34px;
     height: 34px;
     display: flex;
@@ -365,36 +350,32 @@
     transition: background 0.15s ease;
     user-select: none;
   }
-  .date-picker-day:hover:not(.empty):not(.disabled) {
+  .cal-day-picker:hover:not(.empty):not(.disabled) {
     background: rgba(255,255,255,0.1);
   }
-  .date-picker-day.selected {
+  .cal-day-picker.selected {
     background: rgba(255,255,255,0.2);
     color: var(--color-text);
     font-weight: 600;
     border: 1px solid rgba(255,255,255,0.35);
   }
-  .date-picker-day.in-range {
+  .cal-day-picker.in-range {
     background: rgba(255,255,255,0.07);
     border-radius: 0;
   }
-  .date-picker-day.today {
+  .cal-day-picker.today {
     border: 1px solid var(--color-border-light);
   }
-  .date-picker-day.empty {
+  .cal-day-picker.empty {
     cursor: default;
     pointer-events: none;
   }
-  .date-picker-day.disabled {
+  .cal-day-picker.disabled {
     color: var(--text-muted);
     opacity: 0.3;
     cursor: not-allowed;
   }
-    /* Utility classes */
-  .hidden { display: none; }
-  .pos-relative { position: relative; }
-  
-  /* Hamburger button */
+    /* Hamburger button */
   .hamburger {
     background: none;
     border: none;
@@ -712,13 +693,13 @@
   .monthly-stats .ms-pnl.negative { color: var(--red); }
   .monthly-stats .ms-days { color: var(--text-muted); font-size: 12px; }
 
-  .dashboard-calendar-wrapper {
+  .calendar-grid-wrapper {
     display: flex;
-    gap: 4px;
+    gap: 16px;
     align-items: stretch;
   }
 
-  .dashboard-calendar-grid {
+  .calendar-grid {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -735,7 +716,7 @@
     gap: 4px;
   }
 
-  .dashboard-cal-header {
+  .cal-header {
     font-size: 11px;
     color: var(--text-muted);
     text-align: center;
@@ -743,7 +724,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  .dashboard-cal-day {
+  .cal-day {
     background: var(--color-bg-light);
     border-radius: var(--rounded);
     padding: var(--spacing-xs);
@@ -752,18 +733,18 @@
     border: 1px solid transparent;
     transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
   }
-  .dashboard-cal-day.positive { background: rgba(0,201,167,0.08); border-color: rgba(0,201,167,0.2); }
-  .dashboard-cal-day.negative { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.2); }
-  .dashboard-cal-day.positive:hover { background: rgba(0,201,167,0.15); border-color: rgba(0,201,167,0.4); }
-  .dashboard-cal-day.negative:hover { background: rgba(255,71,87,0.15); border-color: rgba(255,71,87,0.4); }
-  .dashboard-cal-day:not(.positive):not(.negative):not(.empty):hover { background: #222; }
-  .dashboard-cal-day .day-num {
+  .cal-day.positive { background: rgba(0,201,167,0.08); border-color: rgba(0,201,167,0.2); }
+  .cal-day.negative { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.2); }
+  .cal-day.positive:hover { background: rgba(0,201,167,0.15); border-color: rgba(0,201,167,0.4); }
+  .cal-day.negative:hover { background: rgba(255,71,87,0.15); border-color: rgba(255,71,87,0.4); }
+  .cal-day:not(.positive):not(.negative):not(.empty):hover { background: #222; }
+  .cal-day .day-num {
     font-size: 11px;
     color: var(--text-muted);
     margin-bottom: 4px;
     text-align: right;
   }
-  .dashboard-cal-day.today .day-num { 
+  .cal-day.today .day-num { 
     width: 24px;
     height: 24px;
     line-height: 24px;
@@ -776,14 +757,14 @@
     margin-left: auto;
     margin-bottom: 4px;
   }
-  .dashboard-cal-day .day-pnl {
+  .cal-day .day-pnl {
     font-size: 13px;
     font-weight: 600;
     letter-spacing: -0.3px;
   }
-  .dashboard-cal-day .day-pnl.positive { color: var(--green); }
-  .dashboard-cal-day .day-pnl.negative { color: var(--red); }
-  .dashboard-cal-day .day-meta {
+  .cal-day .day-pnl.positive { color: var(--green); }
+  .cal-day .day-pnl.negative { color: var(--red); }
+  .cal-day .day-meta {
     font-size: 10px;
     color: var(--text-muted);
     margin-top: 2px;
@@ -833,7 +814,7 @@
   /* Loading */
 
   /* Empty state for calendar days */
-  .dashboard-cal-day.empty { opacity: 0.3; }
+  .cal-day.empty { opacity: 0.3; }
 
   /* Chart expand button */
   .chart-expand-btn {
@@ -945,7 +926,7 @@
     <!-- Date Picker Button + Dropdown -->
     <div class="pos-relative">
       <div style="position:relative; display:none; align-items:center; gap:4px;" id="calendarBtnWrapper">
-        <button onclick="toggleDatePicker()" id="calendarBtn" class="btn-dropdown">
+        <button onclick="toggleDatePicker()" id="calendarBtn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:Manrope;font-size:12px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
             <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -986,13 +967,13 @@
                       <button onclick="nextMonth('from')" class="month-nav">›</button>
                     </div>
                     <div class="picker-grid" id="fromCalendar">
-                      <div class="date-picker-weekday">Su</div>
-                      <div class="date-picker-weekday">Mo</div>
-                      <div class="date-picker-weekday">Tu</div>
-                      <div class="date-picker-weekday">We</div>
-                      <div class="date-picker-weekday">Th</div>
-                      <div class="date-picker-weekday">Fr</div>
-                      <div class="date-picker-weekday">Sa</div>
+                      <div class="cal-weekday">Su</div>
+                      <div class="cal-weekday">Mo</div>
+                      <div class="cal-weekday">Tu</div>
+                      <div class="cal-weekday">We</div>
+                      <div class="cal-weekday">Th</div>
+                      <div class="cal-weekday">Fr</div>
+                      <div class="cal-weekday">Sa</div>
                     </div>
                   </div>
                   <div class="calendar-picker" id="toCalendarWrapper">
@@ -1005,13 +986,13 @@
                       <button onclick="nextMonth('to')" class="month-nav">›</button>
                     </div>
                     <div class="picker-grid" id="toCalendar">
-                      <div class="date-picker-weekday">Su</div>
-                      <div class="date-picker-weekday">Mo</div>
-                      <div class="date-picker-weekday">Tu</div>
-                      <div class="date-picker-weekday">We</div>
-                      <div class="date-picker-weekday">Th</div>
-                      <div class="date-picker-weekday">Fr</div>
-                      <div class="date-picker-weekday">Sa</div>
+                      <div class="cal-weekday">Su</div>
+                      <div class="cal-weekday">Mo</div>
+                      <div class="cal-weekday">Tu</div>
+                      <div class="cal-weekday">We</div>
+                      <div class="cal-weekday">Th</div>
+                      <div class="cal-weekday">Fr</div>
+                      <div class="cal-weekday">Sa</div>
                     </div>
                   </div>
                 </div>
@@ -1033,7 +1014,7 @@
 
     <!-- Account Dropdown -->
     <div class="account-dropdown-wrapper">
-      <button onclick="toggleAccountDropdown()" id="accountBtn" class="btn-dropdown">
+      <button onclick="toggleAccountDropdown()" id="accountBtn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:Manrope;font-size:12px;">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
@@ -1043,7 +1024,7 @@
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </button>
-      <div class="account-dropdown" id="accountDropdown" class="hidden">
+      <div class="account-dropdown" id="accountDropdown" style="display:none;">
         <div class="account-section-title">My accounts</div>
         <div id="accountOptionsList"></div>
       </div>
@@ -1179,8 +1160,8 @@
       <span class="ms-days" id="cal-trading-days">0 days</span>
     </div>
   </div>
-  <div class="dashboard-calendar-wrapper">
-    <div class="dashboard-calendar-grid" id="dashboardCalendarGrid"></div>
+  <div class="calendar-grid-wrapper">
+    <div class="calendar-grid" id="calendarGrid"></div>
     <div class="weekly-sidebar" id="weeklySidebar"></div>
   </div>
 </div>
@@ -1414,7 +1395,7 @@ function renderPickerCalendar(type, month, year) {
 
   // Clear all non-weekday cells
   Array.from(container.children).forEach(child => {
-    if (!child.classList.contains('date-picker-weekday')) child.remove();
+    if (!child.classList.contains('cal-weekday')) child.remove();
   });
 
   const firstDay = new Date(year, month, 1).getDay();
@@ -1431,11 +1412,11 @@ function renderPickerCalendar(type, month, year) {
 
     if (dayNum < 1 || dayNum > daysInMonth) {
       // Empty filler cell — no text, no click
-      el.className = 'date-picker-day empty';
+      el.className = 'cal-day-picker empty';
     } else {
       const date = new Date(year, month, dayNum);
       date.setHours(0, 0, 0, 0);
-      const classes = ['date-picker-day'];
+      const classes = ['cal-day-picker'];
 
       if (date.getTime() === today.getTime()) classes.push('today');
 
@@ -1672,8 +1653,7 @@ const ACCOUNTS = [
 async function loadData() {
   const statusEl = document.getElementById('loadStatus');
 
-  try {
-    console.log('Starting data load...');
+  console.log('Starting data load...');
 
     // Destroy existing charts before re-rendering
     if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
@@ -1736,10 +1716,6 @@ async function loadData() {
   // Show calendar button
   document.getElementById('calendarBtnWrapper').style.display = 'flex';
   document.getElementById('calendarBtn').style.display = 'flex';
-  } catch (error) {
-    console.error('Error loading data:', error);
-    if (statusEl) statusEl.textContent = 'Error loading data. Please refresh the page.';
-  }
 }
 
 function populateAccountDropdown() {
@@ -2037,16 +2013,18 @@ function formatDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 
-function formatCurrency(val, full = false) {
+function formatCurrency(val) {
   const abs = Math.abs(val);
+  let str;
+  if (abs >= 1000) str = '$' + (abs/1000).toFixed(1) + 'K';
+  else str = '$' + abs.toFixed(2);
+  return (val < 0 ? '-' : '') + str;
+}
+
+function formatCurrencyFull(val) {
   const sign = val < 0 ? '-' : '';
-  
-  if (full) {
-    return sign + '$' + abs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  }
-  
-  if (abs >= 1000) return sign + '$' + (abs/1000).toFixed(1) + 'K';
-  return sign + '$' + abs.toFixed(2);
+  const abs = Math.abs(val);
+  return sign + '$' + abs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
 // ============================================================
@@ -2202,7 +2180,7 @@ function renderMetrics() {
   // Net PnL
   const totalPnl = allTrades.reduce((s,t) => s + t.pnl, 0);
   const pnlEl = document.getElementById('val-pnl');
-  pnlEl.textContent = formatCurrency(totalPnl, true);
+  pnlEl.textContent = formatCurrencyFull(totalPnl);
   pnlEl.className = 'value ' + (totalPnl >= 0 ? 'positive' : 'negative');
   
   // Net P&L percentage (relative to starting balance of selected period)
@@ -2301,14 +2279,14 @@ function renderMetrics() {
       // If date filter active, show close balance of last trade in period
       if (dateFilterFrom || dateFilterTo) {
         const lastInPeriod = [...allTrades].sort((a, b) => b.date - a.date)[0];
-        currentBalanceEl.textContent = formatCurrency(lastInPeriod.closeBalance, true);
+        currentBalanceEl.textContent = formatCurrencyFull(lastInPeriod.closeBalance);
         currentBalanceEl.className = 'value ' + (lastInPeriod.closeBalance >= balanceAtPeriodStart ? 'positive' : 'negative');
       } else {
-        currentBalanceEl.textContent = formatCurrency(currentBalance, true);
+        currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
         currentBalanceEl.className = 'value ' + (currentBalance >= filteredSorted[0].startBalance ? 'positive' : 'negative');
       }
     } else {
-      currentBalanceEl.textContent = formatCurrency(currentBalance, true);
+      currentBalanceEl.textContent = formatCurrencyFull(currentBalance);
       currentBalanceEl.className = 'value';
     }
   } else {
@@ -2423,7 +2401,7 @@ function renderCumulativeChart() {
         bodyFont: { family: 'Manrope', size: 13, weight: '600' },
         callbacks: {
           title: function(items) { return items[0].label; },
-          label: function(item) { return ' ' + formatCurrency(item.parsed.y, true); }
+          label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y); }
         }
       }},
       scales: {
@@ -2485,7 +2463,7 @@ function renderDailyChart() {
           bodyFont: { family: 'Manrope', size: 13, weight: '600' },
           callbacks: {
             title: function(items) { return items[0].label; },
-            label: function(item) { return ' ' + formatCurrency(item.parsed.y || 0, true); }
+            label: function(item) { return ' ' + formatCurrencyFull(item.parsed.y || 0); }
           }
         }
       },
@@ -2513,7 +2491,7 @@ function renderCalendar() {
   const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-month-title').textContent = monthNames[calendarMonth] + ' ' + calendarYear;
 
-  const grid = document.getElementById('dashboardCalendarGrid');
+  const grid = document.getElementById('calendarGrid');
   const sidebar = document.getElementById('weeklySidebar');
   grid.innerHTML = '';
   sidebar.innerHTML = '';
@@ -2539,7 +2517,7 @@ function renderCalendar() {
   // Day headers
   ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => {
     const h = document.createElement('div');
-    h.className = 'dashboard-cal-header';
+    h.className = 'cal-header';
     h.textContent = d;
     grid.appendChild(h);
   });
@@ -2550,7 +2528,7 @@ function renderCalendar() {
 
   // Invisible header spacer in sidebar
   const hSpacer = document.createElement('div');
-  hSpacer.className = 'dashboard-cal-header';
+  hSpacer.className = 'cal-header';
   hSpacer.style.visibility = 'hidden';
   sidebar.appendChild(hSpacer);
 
@@ -2562,7 +2540,7 @@ function renderCalendar() {
   // Empty cells before first day
   for (let i = 0; i < startDow; i++) {
     const empty = document.createElement('div');
-    empty.className = 'dashboard-cal-day empty';
+    empty.className = 'cal-day empty';
     grid.appendChild(empty);
   }
 
@@ -2573,7 +2551,7 @@ function renderCalendar() {
     const isToday = (d === today.getDate() && calendarMonth === today.getMonth() && calendarYear === today.getFullYear());
 
     const cell = document.createElement('div');
-    cell.className = 'dashboard-cal-day';
+    cell.className = 'cal-day';
     if (isToday) cell.classList.add('today');
 
     if (data) {
@@ -2604,7 +2582,7 @@ function renderCalendar() {
   const trailingEmpties = (7 - ((startDow + daysInMonth) % 7)) % 7;
   for (let i = 0; i < trailingEmpties; i++) {
     const empty = document.createElement('div');
-    empty.className = 'dashboard-cal-day empty';
+    empty.className = 'cal-day empty';
     grid.appendChild(empty);
   }
 
