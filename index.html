@@ -208,22 +208,30 @@
     padding: 1rem 1.5rem 0.75rem;
     border-bottom: 1px solid var(--color-border);
   }
-  .date-display-row {
+  .date-picker-header-inner {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 0;
+  }
+  .date-label-from {
+    flex: 1;
+    text-align: center;
+  }
+  .date-label-to {
+    flex: 1;
+    text-align: center;
+  }
+  .date-label-arrow {
+    color: var(--text-muted);
+    font-size: 1rem;
+    flex-shrink: 0;
+    padding: 0 8px;
   }
   .date-display-from,
   .date-display-to {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--color-text);
-  }
-  .date-display-arrow {
-    color: var(--text-muted);
-    margin: 0 10px;
-    font-size: 0.9rem;
   }
   .close-btn {
     background: none;
@@ -914,7 +922,21 @@
     box-shadow: 0 16px 48px rgba(0,0,0,0.7);
     overflow: hidden;
   }
+  .chart-expand-popup .chart-expand-body {
+    padding: 1rem 1.4rem 1.4rem;
+    height: 420px;
+    position: relative;
+  }
+  .chart-expand-popup canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
 
+
+  .day-popup-table td.positive { color: var(--green); font-weight: 600; }
+  .day-popup-table td.negative { color: var(--red); font-weight: 600; }
+  .footer-pnl.positive { color: var(--green); }
+  .footer-pnl.negative { color: var(--red); }
 
   .day-popup-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -1001,11 +1023,14 @@
       <div id="datePickerModal" class="date-picker-modal" style="display:none;">
         <div class="date-picker-content">
           <div class="date-picker-header">
-            <div class="date-display-row">
-              <span id="displayFromDate" class="date-display-from">January 01, 2026</span>
-              <span class="date-display-arrow">→</span>
-              <span id="displayToDate" class="date-display-to">February 28, 2026</span>
-              <div style="flex:1"></div>
+            <div class="date-picker-header-inner">
+              <div class="date-label-from">
+                <span id="displayFromDate" class="date-display-from">January 01, 2026</span>
+              </div>
+              <div class="date-label-arrow">→</div>
+              <div class="date-label-to">
+                <span id="displayToDate" class="date-display-to">February 28, 2026</span>
+              </div>
             </div>
             <button onclick="closeDatePicker()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;padding:4px 8px;border-radius:4px;" onmouseover="this.style.background='var(--color-bg-light)'" onmouseout="this.style.background='none'">✕</button>
           </div>
@@ -1229,8 +1254,8 @@
       <span class="day-popup-title" id="chartExpandTitle">Chart</span>
       <button class="day-popup-close" onclick="closeChartExpand()">✕</button>
     </div>
-    <div style="padding:1rem 1.4rem 1.4rem;">
-      <canvas id="expandedChart" style="width:100%;"></canvas>
+    <div class="chart-expand-body">
+      <canvas id="expandedChart"></canvas>
     </div>
   </div>
 </div>
@@ -1335,10 +1360,8 @@ function initializeDatePicker() {
   toMonth = pickerToDate.getMonth();
   toYear = pickerToDate.getFullYear();
 
-  // Show/hide second calendar
-  const sameMonth = pickerFromDate.getMonth() === pickerToDate.getMonth() &&
-                    pickerFromDate.getFullYear() === pickerToDate.getFullYear();
-  document.getElementById('toCalendarWrapper').style.display = sameMonth ? 'none' : '';
+  // Always show both calendars
+  document.getElementById('toCalendarWrapper').style.display = '';
   
   populateMonthYearSelects();
   updateBothCalendars();
@@ -1491,12 +1514,7 @@ function selectDate(type, year, month, day) {
     }
   }
   
-  // Show/hide second calendar based on whether range spans multiple months
-  if (pickerFromDate && pickerToDate) {
-    const sameMonth = pickerFromDate.getMonth() === pickerToDate.getMonth() &&
-                      pickerFromDate.getFullYear() === pickerToDate.getFullYear();
-    document.getElementById('toCalendarWrapper').style.display = sameMonth ? 'none' : '';
-  }
+  // Always keep both calendars visible
 
   updateBothCalendars();
   updateDateDisplay();
@@ -1549,20 +1567,11 @@ function applyPreset(preset) {
   
   fromMonth = pickerFromDate.getMonth();
   fromYear = pickerFromDate.getFullYear();
+  toMonth = pickerToDate.getMonth();
+  toYear = pickerToDate.getFullYear();
 
-  // If range fits in one month, show single calendar; otherwise show both
-  const sameMonth = pickerFromDate.getMonth() === pickerToDate.getMonth() && 
-                    pickerFromDate.getFullYear() === pickerToDate.getFullYear();
-  
-  if (sameMonth) {
-    toMonth = fromMonth;
-    toYear = fromYear;
-    document.getElementById('toCalendarWrapper').style.display = 'none';
-  } else {
-    toMonth = pickerToDate.getMonth();
-    toYear = pickerToDate.getFullYear();
-    document.getElementById('toCalendarWrapper').style.display = '';
-  }
+  // Always keep both calendars visible
+  document.getElementById('toCalendarWrapper').style.display = '';
   
   populateMonthYearSelects();
   updateBothCalendars();
@@ -2123,18 +2132,24 @@ function expandChart(sourceCanvasId, title) {
   document.getElementById('chartExpandTitle').textContent = title;
   document.getElementById('chartExpandOverlay').style.display = 'flex';
 
-  // Destroy previous expanded chart if any
+  // Destroy previous instance
   if (expandedChartInstance) {
     expandedChartInstance.destroy();
     expandedChartInstance = null;
   }
 
-  const canvas = document.getElementById('expandedChart');
-  canvas.height = 400;
+  // Replace the canvas element entirely to reset dimensions
+  const wrapper = document.getElementById('expandedChart').parentElement;
+  const oldCanvas = document.getElementById('expandedChart');
+  oldCanvas.remove();
+  const newCanvas = document.createElement('canvas');
+  newCanvas.id = 'expandedChart';
+  newCanvas.style.width = '100%';
+  newCanvas.style.height = '400px';
+  wrapper.appendChild(newCanvas);
 
-  // Deep clone config from source chart
   const cfg = sourceChart.config;
-  expandedChartInstance = new Chart(canvas, {
+  expandedChartInstance = new Chart(newCanvas, {
     type: cfg.type,
     data: JSON.parse(JSON.stringify(cfg.data)),
     options: {
@@ -2172,19 +2187,23 @@ function openDayPopup(dateKey, day) {
 
   document.getElementById('dayPopupTrades').innerHTML = trades.map(t => {
     const pnlCls = t.pnl > 0 ? 'positive' : t.pnl < 0 ? 'negative' : '';
-    const pnlStr = (t.pnl >= 0 ? '+' : '') + '$' + Math.abs(t.pnl).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    const rStr = t.rMultiple !== undefined && t.rMultiple !== '' ? (parseFloat(t.rMultiple) >= 0 ? '+' : '') + parseFloat(t.rMultiple).toFixed(1) + 'R' : '—';
+    const sign = t.pnl > 0 ? '+' : t.pnl < 0 ? '-' : '';
+    const absVal = Math.abs(t.pnl).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const pnlStr = `${sign}$${absVal}`;
+    const rVal = t.rMultiple !== undefined && t.rMultiple !== '' ? parseFloat(t.rMultiple) : null;
+    const rStr = rVal !== null ? (rVal >= 0 ? '+' : '') + rVal.toFixed(1) + 'R' : '—';
     return `<tr>
-      <td style="font-weight:700">${t.ticker}</td>
-      <td style="color:var(--color-text);font-size:0.85rem">${t.direction || '—'}</td>
-      <td class="${pnlCls}">${pnlStr}</td>
+      <td style="font-weight:700;color:var(--color-text)">${t.ticker}</td>
+      <td style="color:var(--color-text)">${t.direction || '—'}</td>
+      <td class="${pnlCls}" style="font-weight:600">${pnlStr}</td>
       <td style="color:var(--color-text)">${t.roi || '—'}</td>
       <td style="color:var(--color-text)">${rStr}</td>
     </tr>`;
   }).join('');
 
-  const totalCls = totalPnl >= 0 ? 'positive' : 'negative';
-  const totalStr = (totalPnl >= 0 ? '+' : '') + '$' + Math.abs(totalPnl).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const totalCls = totalPnl > 0 ? 'positive' : totalPnl < 0 ? 'negative' : '';
+  const totalSign = totalPnl > 0 ? '+' : totalPnl < 0 ? '-' : '';
+  const totalStr = `${totalSign}$${Math.abs(totalPnl).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
   const winRate = trades.length > 0 ? Math.round((wins / trades.length) * 100) : 0;
   document.getElementById('dayPopupFooter').innerHTML = `
     <span class="footer-label">${trades.length} trade${trades.length > 1 ? 's' : ''} · ${winRate}% win rate</span>
