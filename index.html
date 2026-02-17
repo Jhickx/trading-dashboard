@@ -959,7 +959,7 @@
         </button>
         <button id="clearFilterBtn" onclick="clearDateFilter()" title="Clear filter" style="display:none;background:var(--color-bg-light);border:1px solid var(--color-border);color:var(--text-muted);padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px;line-height:1;font-family:Manrope;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--text-muted)'">✕</button>
       </div>
-      <div id="datePickerModal" class="date-picker-modal" class="hidden">
+      <div id="datePickerModal" class="date-picker-modal" style="display:none;">
         <div class="date-picker-content" onclick="event.stopPropagation()">
           <div class="date-picker-layout">
             <div class="date-picker-left">
@@ -1179,14 +1179,14 @@
       <span class="ms-days" id="cal-trading-days">0 days</span>
     </div>
   </div>
-  <div class="calendar-grid-wrapper">
-    <div class="calendar-grid" id="dashboardCalendarGrid"></div>
+  <div class="dashboard-calendar-wrapper">
+    <div class="dashboard-calendar-grid" id="dashboardCalendarGrid"></div>
     <div class="weekly-sidebar" id="weeklySidebar"></div>
   </div>
 </div>
 
 <!-- Chart expand popup -->
-<div id="chartExpandOverlay" class="day-popup-overlay" class="hidden" onclick="closeChartExpand(event)">
+<div id="chartExpandOverlay" class="day-popup-overlay" style="display:none;" onclick="closeChartExpand(event)">
   <div class="chart-expand-popup" onclick="event.stopPropagation()">
     <div class="day-popup-header" style="padding:1rem 1.4rem;">
       <span class="day-popup-title" id="chartExpandTitle">Chart</span>
@@ -1198,7 +1198,7 @@
 </div>
 
 <!-- Day trades popup -->
-<div id="dayPopupOverlay" class="day-popup-overlay" class="hidden" onclick="closeDayPopup(event)">
+<div id="dayPopupOverlay" class="day-popup-overlay" style="display:none;" onclick="closeDayPopup(event)">
   <div class="day-popup" onclick="event.stopPropagation()">
     <div class="day-popup-header">
       <span class="day-popup-title" id="dayPopupTitle">Trades</span>
@@ -1431,11 +1431,11 @@ function renderPickerCalendar(type, month, year) {
 
     if (dayNum < 1 || dayNum > daysInMonth) {
       // Empty filler cell — no text, no click
-      el.className = 'dashboard-date-picker-day empty';
+      el.className = 'date-picker-day empty';
     } else {
       const date = new Date(year, month, dayNum);
       date.setHours(0, 0, 0, 0);
-      const classes = ['dashboard-date-picker-day'];
+      const classes = ['date-picker-day'];
 
       if (date.getTime() === today.getTime()) classes.push('today');
 
