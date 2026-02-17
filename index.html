@@ -205,14 +205,25 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.25rem 1.5rem;
+    padding: 1rem 1.5rem 0.75rem;
     border-bottom: 1px solid var(--color-border);
   }
-  .date-display {
+  .date-display-row {
+    flex: 1;
     display: flex;
     align-items: center;
-    font-size: 1rem;
-    font-weight: 500;
+    gap: 0;
+  }
+  .date-display-from,
+  .date-display-to {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+  .date-display-arrow {
+    color: var(--text-muted);
+    margin: 0 10px;
+    font-size: 0.9rem;
   }
   .close-btn {
     background: none;
@@ -877,7 +888,34 @@
   /* Empty state for calendar days */
   .cal-day.empty { opacity: 0.3; }
 
-  /* Day trades popup */
+  /* Chart expand button */
+  .chart-expand-btn {
+    background: none;
+    border: 1px solid var(--color-border);
+    color: var(--text-muted);
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s ease, color 0.15s ease;
+    flex-shrink: 0;
+  }
+  .chart-expand-btn:hover {
+    background: var(--color-bg-light);
+    color: var(--color-text);
+    border-color: var(--color-border-light);
+  }
+  .chart-expand-popup {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--rounded);
+    width: 90vw;
+    max-width: 1000px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+    overflow: hidden;
+  }
+
+
   .day-popup-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.55); z-index: 2000;
@@ -963,12 +1001,13 @@
       <div id="datePickerModal" class="date-picker-modal" style="display:none;">
         <div class="date-picker-content">
           <div class="date-picker-header">
-            <div class="date-display">
-              <span id="displayFromDate">January 01, 2026</span>
-              <span style="margin: 0 12px; color: var(--text-muted);">→</span>
-              <span id="displayToDate">February 28, 2026</span>
+            <div class="date-display-row">
+              <span id="displayFromDate" class="date-display-from">January 01, 2026</span>
+              <span class="date-display-arrow">→</span>
+              <span id="displayToDate" class="date-display-to">February 28, 2026</span>
+              <div style="flex:1"></div>
             </div>
-            <button onclick="closeDatePicker()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;padding:4px;">✕</button>
+            <button onclick="closeDatePicker()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;padding:4px 8px;border-radius:4px;" onmouseover="this.style.background='var(--color-bg-light)'" onmouseout="this.style.background='none'">✕</button>
           </div>
           <div class="date-picker-body">
             <div class="calendars-container">
@@ -991,7 +1030,7 @@
                   <div class="cal-weekday">Sa</div>
                 </div>
               </div>
-              <div class="calendar-picker">
+              <div class="calendar-picker" id="toCalendarWrapper">
                 <div class="calendar-picker-header">
                   <button onclick="prevMonth('to')" class="month-nav">‹</button>
                   <div class="month-year">
@@ -1139,13 +1178,25 @@
 <div class="charts-row">
   <div class="chart-card">
     <div class="chart-header">
-      <div class="chart-title">Daily net cumulative P&L </div>
+      <div class="chart-title">Daily net cumulative P&L</div>
+      <button class="chart-expand-btn" onclick="expandChart('cumulativeChart', 'Daily net cumulative P&L')" title="Expand">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      </button>
     </div>
     <canvas id="cumulativeChart" height="220"></canvas>
   </div>
   <div class="chart-card">
     <div class="chart-header">
-      <div class="chart-title">Net daily P&L </div>
+      <div class="chart-title">Net daily P&L</div>
+      <button class="chart-expand-btn" onclick="expandChart('dailyChart', 'Net daily P&L')" title="Expand">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline>
+          <line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line>
+        </svg>
+      </button>
     </div>
     <canvas id="dailyChart" height="220"></canvas>
   </div>
@@ -1168,6 +1219,19 @@
   <div class="calendar-grid-wrapper">
     <div class="calendar-grid" id="calendarGrid"></div>
     <div class="weekly-sidebar" id="weeklySidebar"></div>
+  </div>
+</div>
+
+<!-- Chart expand popup -->
+<div id="chartExpandOverlay" class="day-popup-overlay" style="display:none;" onclick="closeChartExpand(event)">
+  <div class="chart-expand-popup" onclick="event.stopPropagation()">
+    <div class="day-popup-header" style="padding:1rem 1.4rem;">
+      <span class="day-popup-title" id="chartExpandTitle">Chart</span>
+      <button class="day-popup-close" onclick="closeChartExpand()">✕</button>
+    </div>
+    <div style="padding:1rem 1.4rem 1.4rem;">
+      <canvas id="expandedChart" style="width:100%;"></canvas>
+    </div>
   </div>
 </div>
 
@@ -1263,7 +1327,6 @@ function closeDatePicker() {
 }
 
 function initializeDatePicker() {
-  // Initialize with current filter or default
   pickerFromDate = dateFilterFrom || new Date(new Date().getFullYear(), 0, 1);
   pickerToDate = dateFilterTo || new Date();
   
@@ -1271,6 +1334,11 @@ function initializeDatePicker() {
   fromYear = pickerFromDate.getFullYear();
   toMonth = pickerToDate.getMonth();
   toYear = pickerToDate.getFullYear();
+
+  // Show/hide second calendar
+  const sameMonth = pickerFromDate.getMonth() === pickerToDate.getMonth() &&
+                    pickerFromDate.getFullYear() === pickerToDate.getFullYear();
+  document.getElementById('toCalendarWrapper').style.display = sameMonth ? 'none' : '';
   
   populateMonthYearSelects();
   updateBothCalendars();
@@ -1413,18 +1481,23 @@ function selectDate(type, year, month, day) {
   
   if (type === 'from') {
     pickerFromDate = selected;
-    // If from is after to, adjust to
     if (pickerToDate && pickerFromDate > pickerToDate) {
       pickerToDate = new Date(pickerFromDate);
     }
   } else {
     pickerToDate = selected;
-    // If to is before from, adjust from
     if (pickerFromDate && pickerToDate < pickerFromDate) {
       pickerFromDate = new Date(pickerToDate);
     }
   }
   
+  // Show/hide second calendar based on whether range spans multiple months
+  if (pickerFromDate && pickerToDate) {
+    const sameMonth = pickerFromDate.getMonth() === pickerToDate.getMonth() &&
+                      pickerFromDate.getFullYear() === pickerToDate.getFullYear();
+    document.getElementById('toCalendarWrapper').style.display = sameMonth ? 'none' : '';
+  }
+
   updateBothCalendars();
   updateDateDisplay();
 }
@@ -1476,8 +1549,20 @@ function applyPreset(preset) {
   
   fromMonth = pickerFromDate.getMonth();
   fromYear = pickerFromDate.getFullYear();
-  toMonth = pickerToDate.getMonth();
-  toYear = pickerToDate.getFullYear();
+
+  // If range fits in one month, show single calendar; otherwise show both
+  const sameMonth = pickerFromDate.getMonth() === pickerToDate.getMonth() && 
+                    pickerFromDate.getFullYear() === pickerToDate.getFullYear();
+  
+  if (sameMonth) {
+    toMonth = fromMonth;
+    toYear = fromYear;
+    document.getElementById('toCalendarWrapper').style.display = 'none';
+  } else {
+    toMonth = pickerToDate.getMonth();
+    toYear = pickerToDate.getFullYear();
+    document.getElementById('toCalendarWrapper').style.display = '';
+  }
   
   populateMonthYearSelects();
   updateBothCalendars();
@@ -2026,6 +2111,52 @@ function formatCurrencyFull(val) {
 // RENDER ALL
 // ============================================================
 // ============================================================
+// ============================================================
+// CHART EXPAND
+// ============================================================
+let expandedChartInstance = null;
+
+function expandChart(sourceCanvasId, title) {
+  const sourceChart = Chart.getChart(sourceCanvasId);
+  if (!sourceChart) return;
+
+  document.getElementById('chartExpandTitle').textContent = title;
+  document.getElementById('chartExpandOverlay').style.display = 'flex';
+
+  // Destroy previous expanded chart if any
+  if (expandedChartInstance) {
+    expandedChartInstance.destroy();
+    expandedChartInstance = null;
+  }
+
+  const canvas = document.getElementById('expandedChart');
+  canvas.height = 400;
+
+  // Deep clone config from source chart
+  const cfg = sourceChart.config;
+  expandedChartInstance = new Chart(canvas, {
+    type: cfg.type,
+    data: JSON.parse(JSON.stringify(cfg.data)),
+    options: {
+      ...JSON.parse(JSON.stringify(cfg.options)),
+      animation: false,
+      responsive: true,
+      maintainAspectRatio: false,
+    }
+  });
+}
+
+function closeChartExpand(event) {
+  if (!event || event.target === document.getElementById('chartExpandOverlay')) {
+    document.getElementById('chartExpandOverlay').style.display = 'none';
+    if (expandedChartInstance) {
+      expandedChartInstance.destroy();
+      expandedChartInstance = null;
+    }
+  }
+}
+
+// ============================================================
 // DAY POPUP
 // ============================================================
 function openDayPopup(dateKey, day) {
@@ -2040,16 +2171,15 @@ function openDayPopup(dateKey, day) {
   const wins = trades.filter(t => t.pnl > 0).length;
 
   document.getElementById('dayPopupTrades').innerHTML = trades.map(t => {
-    const cls = t.pnl > 0 ? 'positive' : t.pnl < 0 ? 'negative' : '';
+    const pnlCls = t.pnl > 0 ? 'positive' : t.pnl < 0 ? 'negative' : '';
     const pnlStr = (t.pnl >= 0 ? '+' : '') + '$' + Math.abs(t.pnl).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
     const rStr = t.rMultiple !== undefined && t.rMultiple !== '' ? (parseFloat(t.rMultiple) >= 0 ? '+' : '') + parseFloat(t.rMultiple).toFixed(1) + 'R' : '—';
-    const dirColor = t.direction && t.direction.toLowerCase() === 'long' ? 'var(--green)' : t.direction && t.direction.toLowerCase() === 'short' ? 'var(--red)' : 'var(--text-muted)';
     return `<tr>
       <td style="font-weight:700">${t.ticker}</td>
-      <td style="color:${dirColor};font-size:0.8rem;font-weight:600">${t.direction || '—'}</td>
-      <td class="${cls}">${pnlStr}</td>
-      <td class="${cls}">${t.roi || '—'}</td>
-      <td class="${cls}">${rStr}</td>
+      <td style="color:var(--color-text);font-size:0.85rem">${t.direction || '—'}</td>
+      <td class="${pnlCls}">${pnlStr}</td>
+      <td style="color:var(--color-text)">${t.roi || '—'}</td>
+      <td style="color:var(--color-text)">${rStr}</td>
     </tr>`;
   }).join('');
 
