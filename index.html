@@ -294,27 +294,30 @@
   
   .calendar-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, 36px);
     gap: 2px;
+    justify-content: center;
   }
   
   .cal-weekday {
+    width: 36px;
     text-align: center;
     font-size: 11px;
     color: var(--text-muted);
-    padding: 8px 0;
+    padding: 6px 0;
     font-weight: 600;
   }
   
   .cal-day-picker {
-    aspect-ratio: 1;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 13px;
     border-radius: 6px;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.15s ease;
   }
   
   .cal-day-picker:hover:not(.empty):not(.disabled) {
@@ -678,12 +681,18 @@
 
   /* Calendar */
   .calendar-section {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
+    background: var(--gradient-card);
+    border: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow);
+    border-radius: var(--rounded);
     padding: 24px;
     margin-bottom: 24px;
     overflow-x: auto;
+    transition: background 0.2s ease;
+  }
+  .calendar-section:hover {
+    background: var(--gradient-card-hover);
   }
   
   @media (max-width: 768px) {
@@ -778,9 +787,13 @@
     min-height: 100px;
     position: relative;
     border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
   }
   .cal-day.positive { background: rgba(0,201,167,0.08); border-color: rgba(0,201,167,0.2); }
   .cal-day.negative { background: rgba(255,71,87,0.08); border-color: rgba(255,71,87,0.2); }
+  .cal-day.positive:hover { background: rgba(0,201,167,0.15); border-color: rgba(0,201,167,0.4); }
+  .cal-day.negative:hover { background: rgba(255,71,87,0.15); border-color: rgba(255,71,87,0.4); }
+  .cal-day:not(.positive):not(.negative):not(.empty):hover { background: #222; }
   .cal-day .day-num {
     font-size: 11px;
     color: var(--text-muted);
@@ -868,43 +881,54 @@
   /* Day trades popup */
   .day-popup-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); z-index: 2000;
+    background: rgba(0,0,0,0.55); z-index: 2000;
     display: flex; align-items: center; justify-content: center;
   }
   .day-popup {
     background: var(--color-bg);
     border: 1px solid var(--color-border-light);
     border-radius: var(--rounded);
-    padding: 1.5rem;
-    min-width: 320px;
-    max-width: 480px;
+    min-width: 420px;
+    max-width: 560px;
     width: 90%;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+    overflow: hidden;
   }
   .day-popup-header {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 1rem;
+    padding: 1.1rem 1.4rem;
+    border-bottom: 1px solid var(--color-border);
   }
-  .day-popup-title { font-size: 1rem; font-weight: 700; }
+  .day-popup-title { font-size: 0.95rem; font-weight: 700; }
   .day-popup-close {
     background: none; border: none; color: var(--text-muted);
-    cursor: pointer; font-size: 1.2rem; padding: 4px;
+    cursor: pointer; font-size: 1.1rem; padding: 4px 6px;
+    border-radius: 4px; transition: background 0.15s ease;
   }
-  .day-popup-trade {
-    display: grid; grid-template-columns: 1fr auto auto;
-    gap: 0.5rem 1rem; align-items: center;
-    padding: 0.6rem 0; border-bottom: 1px solid var(--color-border);
+  .day-popup-close:hover { background: var(--color-bg-light); color: var(--color-text); }
+  .day-popup-table { width: 100%; border-collapse: collapse; }
+  .day-popup-table thead { background: var(--color-bg-light); }
+  .day-popup-table th {
+    padding: 9px 14px; text-align: left;
+    font-size: 0.68rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    font-weight: 600; white-space: nowrap;
+  }
+  .day-popup-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border);
     font-size: 0.875rem;
   }
-  .day-popup-trade:last-child { border-bottom: none; }
-  .day-popup-ticker { font-weight: 700; }
-  .day-popup-direction { color: var(--text-muted); font-size: 0.8rem; }
-  .day-popup-total {
-    display: flex; justify-content: space-between;
-    margin-top: 1rem; padding-top: 0.75rem;
+  .day-popup-table tbody tr:last-child td { border-bottom: none; }
+  .day-popup-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+  .day-popup-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.85rem 1.4rem;
     border-top: 1px solid var(--color-border-light);
-    font-size: 0.875rem; font-weight: 700;
+    font-size: 0.875rem;
   }
+  .day-popup-footer .footer-label { color: var(--text-muted); font-size: 0.8rem; }
+  .day-popup-footer .footer-pnl { font-weight: 700; font-size: 1rem; }
 
 </style>
 </head>
@@ -933,6 +957,9 @@
           <line x1="3" y1="10" x2="21" y2="10"></line>
         </svg>
         <span id="dateRangeText">All time</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
       </button>
       <div id="datePickerModal" class="date-picker-modal" style="display:none;">
         <div class="date-picker-content">
@@ -1152,8 +1179,19 @@
       <span class="day-popup-title" id="dayPopupTitle">Trades</span>
       <button class="day-popup-close" onclick="closeDayPopup()">✕</button>
     </div>
-    <div id="dayPopupTrades"></div>
-    <div class="day-popup-total" id="dayPopupTotal"></div>
+    <table class="day-popup-table">
+      <thead>
+        <tr>
+          <th>Ticker</th>
+          <th>Direction</th>
+          <th>Net P&L</th>
+          <th>ROI</th>
+          <th>R</th>
+        </tr>
+      </thead>
+      <tbody id="dayPopupTrades"></tbody>
+    </table>
+    <div class="day-popup-footer" id="dayPopupFooter"></div>
   </div>
 </div>
 
@@ -2000,22 +2038,33 @@ function openDayPopup(dateKey, day) {
   document.getElementById('dayPopupTitle').textContent = dateStr;
 
   const totalPnl = trades.reduce((s, t) => s + t.pnl, 0);
-  const totalClass = totalPnl >= 0 ? 'positive' : 'negative';
-  const totalStr = (totalPnl >= 0 ? '+' : '') + '$' + Math.abs(totalPnl).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const wins = trades.filter(t => t.pnl > 0).length;
 
   document.getElementById('dayPopupTrades').innerHTML = trades.map(t => {
-    const pnlClass = t.pnl >= 0 ? 'positive' : 'negative';
-    const pnlStr = (t.pnl >= 0 ? '+' : '') + '$' + Math.abs(t.pnl).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    return `<div class="day-popup-trade">
-      <span class="day-popup-ticker">${t.ticker}</span>
-      <span class="day-popup-direction">${t.direction}</span>
-      <span class="${pnlClass}">${pnlStr}</span>
-    </div>`;
+    const cls = t.pnl > 0 ? 'positive' : t.pnl < 0 ? 'negative' : '';
+    const pnlStr = (t.pnl >= 0 ? '+' : '') + '$' + Math.abs(t.pnl).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const rStr = t.rMultiple !== undefined && t.rMultiple !== '' ? (parseFloat(t.rMultiple) >= 0 ? '+' : '') + parseFloat(t.rMultiple).toFixed(1) + 'R' : '—';
+    const badge = t.pnl > 0
+      ? `<span style="display:inline-block;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:700;background:rgba(0,201,167,0.12);color:var(--green)">Win</span>`
+      : t.pnl < 0
+        ? `<span style="display:inline-block;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:700;background:rgba(255,71,87,0.12);color:var(--red)">Loss</span>`
+        : `<span style="display:inline-block;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:700;background:rgba(142,142,142,0.12);color:var(--text-muted)">BE</span>`;
+    return `<tr>
+      <td style="font-weight:700">${t.ticker}</td>
+      <td>${badge}</td>
+      <td class="${cls}">${pnlStr}</td>
+      <td class="${cls}">${t.roi || '—'}</td>
+      <td class="${cls}">${rStr}</td>
+    </tr>`;
   }).join('');
 
-  document.getElementById('dayPopupTotal').innerHTML = trades.length > 1
-    ? `<span style="color:var(--text-muted)">Total (${trades.length} trades)</span><span class="${totalClass}">${totalStr}</span>`
-    : '';
+  const totalCls = totalPnl >= 0 ? 'positive' : 'negative';
+  const totalStr = (totalPnl >= 0 ? '+' : '') + '$' + Math.abs(totalPnl).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const winRate = trades.length > 0 ? Math.round((wins / trades.length) * 100) : 0;
+  document.getElementById('dayPopupFooter').innerHTML = `
+    <span class="footer-label">${trades.length} trade${trades.length > 1 ? 's' : ''} · ${winRate}% win rate</span>
+    <span class="footer-pnl ${totalCls}">${totalStr}</span>
+  `;
 
   document.getElementById('dayPopupOverlay').style.display = 'flex';
 }
