@@ -1570,8 +1570,17 @@ function applyDateFilterFromPicker() {
   // Filter allTrades by account then date
   allTrades = allTradesUnfiltered.filter(t => {
     if (t.account !== selectedAccount) return false;
-    if (dateFilterFrom && t.date < dateFilterFrom) return false;
-    if (dateFilterTo && t.date > dateFilterTo) return false;
+    
+    // Compare dates only (ignore time) by using date keys
+    if (dateFilterFrom) {
+      const fromKey = formatDateKey(dateFilterFrom);
+      if (t.dateKey < fromKey) return false;
+    }
+    if (dateFilterTo) {
+      const toKey = formatDateKey(dateFilterTo);
+      if (t.dateKey > toKey) return false;
+    }
+    
     return true;
   });
   
