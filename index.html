@@ -185,26 +185,21 @@
     font-weight: 600;
   }
   
-  /* Date Picker Modal */
+  /* Date Picker Dropdown */
   .date-picker-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
     z-index: 1000;
+    width: 700px;
+    max-width: 95vw;
   }
   .date-picker-content {
     background: var(--color-bg);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-light);
     border-radius: var(--rounded);
-    width: 90%;
-    max-width: 900px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
   }
   .date-picker-header {
     display: flex;
@@ -884,17 +879,90 @@
     <h1>Trading Dashboard</h1>
   </div>
   <div style="display:flex; gap:12px; align-items:center;">
-    <button onclick="toggleDatePicker()" class="calendar-btn" id="calendarBtn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s ease;display:none;align-items:center;gap:8px;">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-        <line x1="16" y1="2" x2="16" y2="6"></line>
-        <line x1="8" y1="2" x2="8" y2="6"></line>
-        <line x1="3" y1="10" x2="21" y2="10"></line>
-      </svg>
-      <span id="dateRangeText">All time</span>
-    </button>
+
+    <!-- Date Picker Button + Dropdown -->
+    <div style="position:relative;">
+      <button onclick="toggleDatePicker()" id="calendarBtn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;cursor:pointer;display:none;align-items:center;gap:8px;font-family:Manrope;font-size:12px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span id="dateRangeText">All time</span>
+      </button>
+      <div id="datePickerModal" class="date-picker-modal" style="display:none;">
+        <div class="date-picker-content">
+          <div class="date-picker-header">
+            <div class="date-display">
+              <span id="displayFromDate">January 01, 2026</span>
+              <span style="margin: 0 12px; color: var(--text-muted);">→</span>
+              <span id="displayToDate">February 28, 2026</span>
+            </div>
+            <button onclick="closeDatePicker()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:18px;padding:4px;">✕</button>
+          </div>
+          <div class="date-picker-body">
+            <div class="calendars-wrapper">
+              <div class="calendar-picker">
+                <div class="calendar-picker-header">
+                  <button onclick="prevMonth('from')" class="month-nav">‹</button>
+                  <div class="month-year">
+                    <select id="fromMonth" onchange="updateFromCalendar()"></select>
+                    <select id="fromYear" onchange="updateFromCalendar()"></select>
+                  </div>
+                  <button onclick="nextMonth('from')" class="month-nav">›</button>
+                </div>
+                <div class="calendar-grid" id="fromCalendar">
+                  <div class="cal-weekday">Su</div>
+                  <div class="cal-weekday">Mo</div>
+                  <div class="cal-weekday">Tu</div>
+                  <div class="cal-weekday">We</div>
+                  <div class="cal-weekday">Th</div>
+                  <div class="cal-weekday">Fr</div>
+                  <div class="cal-weekday">Sa</div>
+                </div>
+              </div>
+              <div class="calendar-picker">
+                <div class="calendar-picker-header">
+                  <button onclick="prevMonth('to')" class="month-nav">‹</button>
+                  <div class="month-year">
+                    <select id="toMonth" onchange="updateToCalendar()"></select>
+                    <select id="toYear" onchange="updateToCalendar()"></select>
+                  </div>
+                  <button onclick="nextMonth('to')" class="month-nav">›</button>
+                </div>
+                <div class="calendar-grid" id="toCalendar">
+                  <div class="cal-weekday">Su</div>
+                  <div class="cal-weekday">Mo</div>
+                  <div class="cal-weekday">Tu</div>
+                  <div class="cal-weekday">We</div>
+                  <div class="cal-weekday">Th</div>
+                  <div class="cal-weekday">Fr</div>
+                  <div class="cal-weekday">Sa</div>
+                </div>
+              </div>
+            </div>
+            <div class="presets-container">
+              <button onclick="applyPreset('today')" class="preset-btn">Today</button>
+              <button onclick="applyPreset('week')" class="preset-btn">This week</button>
+              <button onclick="applyPreset('month')" class="preset-btn">This month</button>
+              <button onclick="applyPreset('30days')" class="preset-btn">Last 30 days</button>
+              <button onclick="applyPreset('lastmonth')" class="preset-btn">Last month</button>
+              <button onclick="applyPreset('quarter')" class="preset-btn">This quarter</button>
+              <button onclick="applyPreset('ytd')" class="preset-btn">YTD (year to date)</button>
+            </div>
+          </div>
+          <div class="date-picker-footer">
+            <button onclick="clearDateFilter()" class="btn-secondary">Clear</button>
+            <button onclick="applyDateFilterFromPicker()" class="btn-primary">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- end calendar relative wrapper -->
+
+    <!-- Account Dropdown -->
     <div class="account-dropdown-wrapper">
-      <button onclick="toggleAccountDropdown()" class="account-btn" id="accountBtn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s ease;display:flex;align-items:center;gap:8px;">
+      <button onclick="toggleAccountDropdown()" id="accountBtn" style="background:var(--gradient-card);border:1px solid var(--color-border);border-top:1px solid var(--color-border-light);color:var(--color-text);padding:8px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:Manrope;font-size:12px;">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
           <circle cx="12" cy="7" r="4"></circle>
@@ -909,85 +977,11 @@
         <div id="accountOptionsList"></div>
       </div>
     </div>
+
   </div>
 </div>
 
-<!-- Date Picker Modal -->
-<div id="datePickerModal" class="date-picker-modal" style="display:none;">
-  <div class="date-picker-content">
-    <div class="date-picker-header">
-      <div class="date-display">
-        <span id="displayFromDate">January 01, 2026</span>
-        <span style="margin: 0 12px; color: var(--text-muted);">→</span>
-        <span id="displayToDate">February 28, 2026</span>
-      </div>
-      <button onclick="toggleDatePicker()" class="close-btn">×</button>
-    </div>
-    
-    <div class="date-picker-body">
-      <div class="calendars-container">
-        <div class="calendar-picker">
-          <div class="calendar-picker-header">
-            <button onclick="prevMonth('from')" class="month-nav">‹</button>
-            <div class="month-year">
-              <select id="fromMonth" onchange="updateFromCalendar()"></select>
-              <select id="fromYear" onchange="updateFromCalendar()"></select>
-            </div>
-            <button onclick="nextMonth('from')" class="month-nav">›</button>
-          </div>
-          <div class="calendar-grid" id="fromCalendar">
-            <div class="cal-weekday">Su</div>
-            <div class="cal-weekday">Mo</div>
-            <div class="cal-weekday">Tu</div>
-            <div class="cal-weekday">We</div>
-            <div class="cal-weekday">Th</div>
-            <div class="cal-weekday">Fr</div>
-            <div class="cal-weekday">Sa</div>
-            <!-- Days will be inserted here by JS -->
-          </div>
-        </div>
-        
-        <div class="calendar-picker">
-          <div class="calendar-picker-header">
-            <button onclick="prevMonth('to')" class="month-nav">‹</button>
-            <div class="month-year">
-              <select id="toMonth" onchange="updateToCalendar()"></select>
-              <select id="toYear" onchange="updateToCalendar()"></select>
-            </div>
-            <button onclick="nextMonth('to')" class="month-nav">›</button>
-          </div>
-          <div class="calendar-grid" id="toCalendar">
-            <div class="cal-weekday">Su</div>
-            <div class="cal-weekday">Mo</div>
-            <div class="cal-weekday">Tu</div>
-            <div class="cal-weekday">We</div>
-            <div class="cal-weekday">Th</div>
-            <div class="cal-weekday">Fr</div>
-            <div class="cal-weekday">Sa</div>
-            <!-- Days will be inserted here by JS -->
-          </div>
-        </div>
-      </div>
-      
-      <div class="presets-container">
-        <button onclick="applyPreset('today')" class="preset-btn">Today</button>
-        <button onclick="applyPreset('week')" class="preset-btn">This week</button>
-        <button onclick="applyPreset('month')" class="preset-btn">This month</button>
-        <button onclick="applyPreset('30days')" class="preset-btn">Last 30 days</button>
-        <button onclick="applyPreset('lastmonth')" class="preset-btn">Last month</button>
-        <button onclick="applyPreset('quarter')" class="preset-btn">This quarter</button>
-        <button onclick="applyPreset('ytd')" class="preset-btn">YTD (year to date)</button>
-      </div>
-    </div>
-    
-    <div class="date-picker-footer">
-      <button onclick="clearDateFilter()" class="btn-secondary">Clear</button>
-      <button onclick="applyDateFilterFromPicker()" class="btn-primary">Apply</button>
-    </div>
-  </div>
-</div>
-
-<div class="container">
+<div style="display:flex; gap:2rem;">
 <aside class="sidebar hide-sidebar">
   <a href="index.html" class="sidebar-link active-link">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1165,11 +1159,16 @@ if (toMonth > 11) {
 function toggleDatePicker() {
   const modal = document.getElementById('datePickerModal');
   const isOpening = modal.style.display === 'none';
-  modal.style.display = isOpening ? 'flex' : 'none';
+  modal.style.display = isOpening ? 'block' : 'none';
   
   if (isOpening) {
     initializeDatePicker();
   }
+}
+
+function closeDatePicker() {
+  document.getElementById('datePickerModal').style.display = 'none';
+}
 }
 
 function initializeDatePicker() {
@@ -1682,12 +1681,19 @@ function updateAccountCheckboxes() {
   }
 }
 
-// Close dropdown when clicking outside
+// Close dropdowns when clicking outside
 document.addEventListener('click', (e) => {
+  // Close account dropdown
   const wrapper = document.querySelector('.account-dropdown-wrapper');
   const dropdown = document.getElementById('accountDropdown');
   if (wrapper && dropdown && !wrapper.contains(e.target)) {
     dropdown.style.display = 'none';
+  }
+  // Close date picker
+  const calendarWrapper = document.getElementById('calendarBtn')?.parentElement;
+  const dateModal = document.getElementById('datePickerModal');
+  if (calendarWrapper && dateModal && !calendarWrapper.contains(e.target)) {
+    dateModal.style.display = 'none';
   }
 });
 
@@ -1790,31 +1796,40 @@ function parseAccountCSV(text, accountName) {
 // Parse new date format: "21/01/26 23:03" or "d/m/y h:mm"
 function parseDateTimeNew(str) {
   if (!str) return null;
+  str = str.trim().replace(/^"|"$/g, ''); // Remove surrounding quotes if any
   
-  // Format: "21/01/26 23:03" or "22/01/26 16:49"
-  const parts = str.trim().split(' ');
-  if (parts.length < 1) return null;
+  // New format: "January 21, 2026 22:27"
+  const monthNames = {
+    'january': 0, 'february': 1, 'march': 2, 'april': 3,
+    'may': 4, 'june': 5, 'july': 6, 'august': 7,
+    'september': 8, 'october': 9, 'november': 10, 'december': 11
+  };
   
-  const datePart = parts[0]; // "21/01/26"
-  const timePart = parts[1]; // "23:03" or undefined
-  
-  const dateComponents = datePart.split('/');
-  if (dateComponents.length !== 3) return null;
-  
-  const day = parseInt(dateComponents[0]);
-  const month = parseInt(dateComponents[1]) - 1; // JS months are 0-indexed
-  const year = 2000 + parseInt(dateComponents[2]); // "26" -> 2026
-  
-  let hours = 0, minutes = 0;
-  if (timePart) {
-    const timeComponents = timePart.split(':');
-    hours = parseInt(timeComponents[0]) || 0;
-    minutes = parseInt(timeComponents[1]) || 0;
+  // Try "January 21, 2026 22:27" format
+  const longMatch = str.match(/^(\w+)\s+(\d+),\s+(\d{4})\s+(\d+):(\d+)/);
+  if (longMatch) {
+    const month = monthNames[longMatch[1].toLowerCase()];
+    const day = parseInt(longMatch[2]);
+    const year = parseInt(longMatch[3]);
+    const hours = parseInt(longMatch[4]);
+    const minutes = parseInt(longMatch[5]);
+    if (month !== undefined) {
+      return new Date(year, month, day, hours, minutes, 0, 0);
+    }
   }
   
-  const date = new Date(year, month, day, hours, minutes, 0, 0);
+  // Fallback: "21/01/26 22:27" format
+  const shortMatch = str.match(/^(\d+)\/(\d+)\/(\d+)\s+(\d+):(\d+)/);
+  if (shortMatch) {
+    const day = parseInt(shortMatch[1]);
+    const month = parseInt(shortMatch[2]) - 1;
+    const year = 2000 + parseInt(shortMatch[3]);
+    const hours = parseInt(shortMatch[4]);
+    const minutes = parseInt(shortMatch[5]);
+    return new Date(year, month, day, hours, minutes, 0, 0);
+  }
   
-  return date;
+  return null;
 }
 
 // Keep old parseCSV for backwards compatibility (not used now)
@@ -2414,6 +2429,7 @@ function goToThisMonth() {
 loadData();
 </script>
 </div> <!-- Close main-content -->
+</div> <!-- Close flex wrapper -->
 </div> <!-- Close container -->
 </body>
 </html>
